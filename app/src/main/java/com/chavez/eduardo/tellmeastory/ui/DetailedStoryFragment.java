@@ -1,0 +1,88 @@
+package com.chavez.eduardo.tellmeastory.ui;
+
+import android.os.Bundle;
+import android.support.annotation.Nullable;
+import android.support.v4.app.Fragment;
+import android.util.Log;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.ImageView;
+import android.widget.TextView;
+
+import com.chavez.eduardo.tellmeastory.R;
+import com.chavez.eduardo.tellmeastory.network.DetailedStory;
+import com.squareup.picasso.Picasso;
+
+import butterknife.BindView;
+import butterknife.ButterKnife;
+import butterknife.Unbinder;
+
+/**
+ * A placeholder fragment containing a simple view.
+ */
+public class DetailedStoryFragment extends Fragment {
+    /**
+     * The fragment argument representing the section number for this
+     * fragment.
+     */
+    private static final String DETAILED_STORY = "detailed_story";
+
+    Unbinder unbinder;
+
+    @BindView(R.id.section_title)
+    TextView storyDetailedTitle;
+
+    @BindView(R.id.section_text_content)
+    TextView storyDetailedContent;
+
+    @BindView(R.id.section_image)
+    ImageView storyDetailedImage;
+
+    public static final String LOG_TAG = DetailedStoryFragment.class.getSimpleName();
+
+    public DetailedStoryFragment() {
+    }
+
+    /**
+     * Returns a new instance of this fragment for the given section
+     * number.
+     */
+    public static DetailedStoryFragment newInstance(DetailedStory story) {
+        DetailedStoryFragment fragment = new DetailedStoryFragment();
+        Bundle args = new Bundle();
+        args.putSerializable(DETAILED_STORY, story);
+        fragment.setArguments(args);
+        return fragment;
+    }
+
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+                             Bundle savedInstanceState) {
+        View rootView = inflater.inflate(R.layout.fragment_story_detail, container, false);
+        unbinder = ButterKnife.bind(this, rootView);
+        return rootView;
+    }
+
+    @Override
+    public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        if (getArguments().getSerializable(DETAILED_STORY) != null) {
+            DetailedStory story = (DetailedStory) getArguments().getSerializable(DETAILED_STORY);
+            Log.d(LOG_TAG, story.toString());
+            populateView(story);
+        }
+    }
+
+    private void populateView(DetailedStory story) {
+        storyDetailedTitle.setText(story.getSectionTitle());
+        storyDetailedContent.setText(story.getSectionText());
+        Picasso.with(getContext()).load(story.getSectionImage()).into(storyDetailedImage);
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        unbinder.unbind();
+    }
+}

@@ -1,5 +1,6 @@
 package com.chavez.eduardo.tellmeastory.network;
 
+
 import com.google.gson.annotations.SerializedName;
 
 import java.io.Serializable;
@@ -29,7 +30,6 @@ public class GeneralStory implements Serializable {
     @SerializedName("story_content")
     private List<DetailedStory> detailedStories;
 
-
     public int getIdStory() {
         return idStory;
     }
@@ -37,7 +37,6 @@ public class GeneralStory implements Serializable {
     public String getStoryName() {
         return storyName;
     }
-
 
     public int getStoryAuthor() {
         return storyAuthor;
@@ -54,6 +53,9 @@ public class GeneralStory implements Serializable {
     public String getStoryThumbnail() {
         return storyThumbnail;
     }
+
+
+
 
     @Override
     public String toString() {

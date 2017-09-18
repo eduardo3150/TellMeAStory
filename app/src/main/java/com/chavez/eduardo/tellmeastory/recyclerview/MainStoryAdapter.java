@@ -23,12 +23,14 @@ import butterknife.ButterKnife;
 
 public class MainStoryAdapter extends RecyclerView.Adapter<MainStoryAdapter.ViewHolder> {
 
-    List<GeneralStory> generalStories;
-    Context context;
+    private List<GeneralStory> generalStories;
+    private Context context;
+    private RecyclerViewItemListener listener;
 
-    public MainStoryAdapter(List<GeneralStory> generalStories, Context context) {
+    public MainStoryAdapter(List<GeneralStory> generalStories, Context context, RecyclerViewItemListener listener) {
         this.generalStories = generalStories;
         this.context = context;
+        this.listener = listener;
     }
 
     @Override
@@ -38,10 +40,17 @@ public class MainStoryAdapter extends RecyclerView.Adapter<MainStoryAdapter.View
     }
 
     @Override
-    public void onBindViewHolder(ViewHolder holder, int position) {
-        GeneralStory story = generalStories.get(position);
+    public void onBindViewHolder(final ViewHolder holder, int position) {
+        final GeneralStory story = generalStories.get(position);
         holder.story_title.setText(story.getStoryName());
         Picasso.with(context).load(story.getStoryThumbnail()).into(holder.story_thumbnail);
+        holder.itemView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                listener.onRecyclerViewItemClick(holder.getAdapterPosition(), story, holder.story_thumbnail);
+            }
+        });
+
     }
 
     @Override
@@ -58,7 +67,7 @@ public class MainStoryAdapter extends RecyclerView.Adapter<MainStoryAdapter.View
 
         public ViewHolder(View itemView) {
             super(itemView);
-            ButterKnife.bind(this,itemView);
+            ButterKnife.bind(this, itemView);
         }
     }
 }
