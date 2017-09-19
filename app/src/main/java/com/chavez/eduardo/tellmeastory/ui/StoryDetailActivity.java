@@ -18,6 +18,7 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -86,6 +87,7 @@ public class StoryDetailActivity extends AppCompatActivity implements AppBarLayo
     private int whereAmISpeaking = 0;
     private boolean rotated = false;
     private boolean firstAppearTTS = true;
+    private boolean canTransform = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -127,32 +129,41 @@ public class StoryDetailActivity extends AppCompatActivity implements AppBarLayo
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if (story != null && !speakRequest.isSpeaking()) {
-                    speakRequest.speak(story.getDetailedStories().get(whereAmISpeaking).getSectionText());
-                    animateButtons();
-                } else {
-                    speakRequest.stopSpeak();
-                    animateButtons();
-                }
 
-                if (rotated) {
-                    Snackbar.make(view, "Reproduciendo", Snackbar.LENGTH_LONG)
-                            .setAction("Detener", new View.OnClickListener() {
-                                @Override
-                                public void onClick(View view) {
-                                    if (speakRequest.isSpeaking()) {
-                                        speakRequest.stopSpeak();
-                                        animateButtons();
-                                    }
-                                }
-                            }).show();
-                } else if (firstAppearTTS) {
+                if (firstAppearTTS) {
                     firstAppearTTS = false;
-                } else {
-                    Snackbar.make(view, "Detenido", Snackbar.LENGTH_LONG)
+                    Snackbar.make(view, "Reproduccion lista", Snackbar.LENGTH_LONG)
                             .show();
-                }
+                    rotated = true;
+                    animateButtons();
+                } else {
+                    if (story != null && !speakRequest.isSpeaking() && rotated) {
+                        speakRequest.speak(story.getDetailedStories().get(whereAmISpeaking).getSectionText());
+                        rotated = false;
+                        animateButtons();
 
+                        Snackbar.make(view, "Reproduciendo", Snackbar.LENGTH_LONG)
+                                .setAction("Detener", new View.OnClickListener() {
+                                    @Override
+                                    public void onClick(View view) {
+                                        if (speakRequest.isSpeaking()) {
+                                            speakRequest.stopSpeak();
+                                            rotated = true;
+                                            animateButtons();
+                                        }
+                                    }
+                                }).show();
+
+
+                    } else {
+                        speakRequest.stopSpeak();
+                        rotated = true;
+                        animateButtons();
+                        Snackbar.make(view, "Detenido", Snackbar.LENGTH_LONG)
+                                .show();
+                    }
+
+                }
             }
         });
 
@@ -172,6 +183,7 @@ public class StoryDetailActivity extends AppCompatActivity implements AppBarLayo
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
+                        rotated = true;
                         animateButtonsAfterSpeak();
                     }
                 });
@@ -186,10 +198,11 @@ public class StoryDetailActivity extends AppCompatActivity implements AppBarLayo
 
     private void animateButtonsAfterSpeak() {
         ObjectAnimator.ofFloat(fab, "rotation", 0f, 360f).setDuration(600).start();
-        rotated = !rotated;
-        fab.setImageDrawable(rotated ? VectorDrawableCompat.create(getResources(), R.drawable.ic_play_arrow_24dp, null) : VectorDrawableCompat.create(getResources(), R.drawable.ic_stop_24dp, null));
-
-
+        if (rotated) {
+            fab.setImageDrawable(VectorDrawableCompat.create(getResources(), R.drawable.ic_play_arrow_24dp, null));
+        } else {
+            fab.setImageDrawable(VectorDrawableCompat.create(getResources(), R.drawable.ic_stop_24dp, null));
+        }
     }
 
 
@@ -238,20 +251,21 @@ public class StoryDetailActivity extends AppCompatActivity implements AppBarLayo
 
             }
 
+
             @Override
-            public void onPageSelected(int position) {
+            public void onPageSelected(final int position) {
+
                 if (speakRequest.isSpeaking()) {
                     speakRequest.stopSpeak();
                     whereAmISpeaking = position;
-                    runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            animateButtonsAfterSpeak();
-                        }
-                    });
+                    rotated = true;
+                    animateButtons();
                 } else {
                     whereAmISpeaking = position;
+                    rotated = true;
+                    animateButtons();
                 }
+
 
             }
 
@@ -333,16 +347,11 @@ public class StoryDetailActivity extends AppCompatActivity implements AppBarLayo
         handler.postDelayed(new Runnable() {
             @Override
             public void run() {
-                /**
-                 if (rotated) {
-                 fab.setImageDrawable(VectorDrawableCompat.create(getResources(), R.drawable.ic_play_arrow_24dp, null));
-                 rotated = false;
-                 } else {
-                 fab.setImageDrawable(VectorDrawableCompat.create(getResources(), R.drawable.ic_stop_24dp, null));
-                 rotated = true;
-                 } **/
-                rotated = !rotated;
-                fab.setImageDrawable(rotated ? VectorDrawableCompat.create(getResources(), R.drawable.ic_play_arrow_24dp, null) : VectorDrawableCompat.create(getResources(), R.drawable.ic_stop_24dp, null));
+                if (rotated) {
+                    fab.setImageDrawable(VectorDrawableCompat.create(getResources(), R.drawable.ic_play_arrow_24dp, null));
+                } else {
+                    fab.setImageDrawable(VectorDrawableCompat.create(getResources(), R.drawable.ic_stop_24dp, null));
+                }
 
             }
         }, 400);
