@@ -53,30 +53,29 @@
     </android.support.design.widget.AppBarLayout>
 
     <android.support.v7.widget.CardView
-            android:id="@+id/flexible.example.cardview"
+        android:id="@+id/flexible.example.cardview"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="8dp"
+        app:behavior_overlapTop="78dp"
+        app:cardBackgroundColor="@android:color/white"
+        app:cardCornerRadius="4dp"
+        app:cardElevation="4dp"
+        app:contentPaddingBottom="16dp"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior">
+
+        <LinearLayout
+            android:id="@+id/viewGroupContainer"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_margin="8dp"
-            app:cardBackgroundColor="@android:color/white"
-            app:cardCornerRadius="4dp"
-            app:cardElevation="4dp"
-            app:contentPaddingBottom="16dp"
-            app:behavior_overlapTop="78dp"
-            app:layout_behavior="@string/appbar_scrolling_view_behavior">
+            android:orientation="vertical">
 
-            <LinearLayout
-                android:id="@+id/viewGroupContainer"
+            <android.support.v4.view.ViewPager
+                android:id="@+id/container"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical">
-
-                <android.support.v4.view.ViewPager
-                    android:id="@+id/container"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    />
-            </LinearLayout>
-        </android.support.v7.widget.CardView>
+                android:layout_height="match_parent" />
+        </LinearLayout>
+    </android.support.v7.widget.CardView>
 
 
     <android.support.design.widget.FloatingActionButton
@@ -85,7 +84,6 @@
         android:layout_height="wrap_content"
         android:layout_margin="@dimen/fab_margin"
         app:layout_anchor="@id/flexible.example.cardview"
-        app:layout_anchorGravity="top|right|end"
-        app:srcCompat="@drawable/ic_play_arrow_24dp"/>
+        app:layout_anchorGravity="top|right|end" />
 
 </android.support.design.widget.CoordinatorLayout>

@@ -22,4 +22,10 @@
         <item name="android:textSize">30sp</item>
     </style>
 
+    <style name="TextComponent"/>
+    <style name="TextComponent.ItemRow">
+        <item name="android:gravity">center_vertical</item>
+        <item name="android:minHeight">48dp</item>
+    </style>
+
 </resources>

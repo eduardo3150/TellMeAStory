@@ -84,8 +84,8 @@ public class StoryDetailActivity extends AppCompatActivity implements AppBarLayo
     //GOOGLE TTS
     private SpeakRequest speakRequest;
     private int whereAmISpeaking = 0;
-    private boolean rotated;
-
+    private boolean rotated = false;
+    private boolean firstAppearTTS = true;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -122,13 +122,22 @@ public class StoryDetailActivity extends AppCompatActivity implements AppBarLayo
 
 
         speakRequest = new SpeakRequest(this);
+        listenToFinishedText();
+        fab.setImageDrawable(VectorDrawableCompat.create(getResources(), R.drawable.ic_headset_24dp, null));
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 if (story != null && !speakRequest.isSpeaking()) {
                     speakRequest.speak(story.getDetailedStories().get(whereAmISpeaking).getSectionText());
+                    animateButtons();
+                } else {
+                    speakRequest.stopSpeak();
+                    animateButtons();
+                }
+
+                if (rotated) {
                     Snackbar.make(view, "Reproduciendo", Snackbar.LENGTH_LONG)
-                            .setAction("Stop", new View.OnClickListener() {
+                            .setAction("Detener", new View.OnClickListener() {
                                 @Override
                                 public void onClick(View view) {
                                     if (speakRequest.isSpeaking()) {
@@ -137,19 +146,18 @@ public class StoryDetailActivity extends AppCompatActivity implements AppBarLayo
                                     }
                                 }
                             }).show();
-                    animateButtons();
-                }
-
-                if (speakRequest.isSpeaking()) {
-                    speakRequest.stopSpeak();
-                    animateButtons();
+                } else if (firstAppearTTS) {
+                    firstAppearTTS = false;
+                } else {
+                    Snackbar.make(view, "Detenido", Snackbar.LENGTH_LONG)
+                            .show();
                 }
 
             }
         });
 
         appBarLayout.addOnOffsetChangedListener(this);
-        listenToFinishedText();
+
     }
 
     private void listenToFinishedText() {
@@ -178,13 +186,10 @@ public class StoryDetailActivity extends AppCompatActivity implements AppBarLayo
 
     private void animateButtonsAfterSpeak() {
         ObjectAnimator.ofFloat(fab, "rotation", 0f, 360f).setDuration(600).start();
-        if (rotated) {
-            fab.setImageDrawable(VectorDrawableCompat.create(getResources(), R.drawable.ic_play_arrow_24dp, null));
-            rotated = false;
-        } else {
-            fab.setImageDrawable(VectorDrawableCompat.create(getResources(), R.drawable.ic_stop_24dp, null));
-            rotated = true;
-        }
+        rotated = !rotated;
+        fab.setImageDrawable(rotated ? VectorDrawableCompat.create(getResources(), R.drawable.ic_play_arrow_24dp, null) : VectorDrawableCompat.create(getResources(), R.drawable.ic_stop_24dp, null));
+
+
     }
 
 
@@ -238,7 +243,12 @@ public class StoryDetailActivity extends AppCompatActivity implements AppBarLayo
                 if (speakRequest.isSpeaking()) {
                     speakRequest.stopSpeak();
                     whereAmISpeaking = position;
-                    animateButtons();
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            animateButtonsAfterSpeak();
+                        }
+                    });
                 } else {
                     whereAmISpeaking = position;
                 }
@@ -301,8 +311,20 @@ public class StoryDetailActivity extends AppCompatActivity implements AppBarLayo
 
     @Override
     protected void onPause() {
-        speakRequest.onDestroy();
+        speakRequest.stopSpeak();
         super.onPause();
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        speakRequest.onDestroy();
+        unbinder.unbind();
     }
 
     private void animateButtons() {
@@ -311,13 +333,17 @@ public class StoryDetailActivity extends AppCompatActivity implements AppBarLayo
         handler.postDelayed(new Runnable() {
             @Override
             public void run() {
-                if (rotated) {
-                    fab.setImageDrawable(VectorDrawableCompat.create(getResources(), R.drawable.ic_play_arrow_24dp, null));
-                    rotated = false;
-                } else {
-                    fab.setImageDrawable(VectorDrawableCompat.create(getResources(), R.drawable.ic_stop_24dp, null));
-                    rotated = true;
-                }
+                /**
+                 if (rotated) {
+                 fab.setImageDrawable(VectorDrawableCompat.create(getResources(), R.drawable.ic_play_arrow_24dp, null));
+                 rotated = false;
+                 } else {
+                 fab.setImageDrawable(VectorDrawableCompat.create(getResources(), R.drawable.ic_stop_24dp, null));
+                 rotated = true;
+                 } **/
+                rotated = !rotated;
+                fab.setImageDrawable(rotated ? VectorDrawableCompat.create(getResources(), R.drawable.ic_play_arrow_24dp, null) : VectorDrawableCompat.create(getResources(), R.drawable.ic_stop_24dp, null));
+
             }
         }, 400);
     }

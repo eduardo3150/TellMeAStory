@@ -1,17 +1,27 @@
 package com.chavez.eduardo.tellmeastory.ui;
 
 
+import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
+import android.support.annotation.NonNull;
+import android.support.design.widget.NavigationView;
+import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityOptionsCompat;
+import android.support.v4.view.GravityCompat;
 import android.support.v4.view.ViewCompat;
+import android.support.v4.widget.DrawerLayout;
+import android.support.v4.widget.SwipeRefreshLayout;
+import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatDelegate;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.MenuItem;
 import android.widget.ImageView;
 import android.widget.Toast;
 
@@ -38,7 +48,7 @@ import retrofit2.Response;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
-public class MainActivity extends AppCompatActivity implements RecyclerViewItemListener {
+public class MainActivity extends AppCompatActivity implements RecyclerViewItemListener, NavigationView.OnNavigationItemSelectedListener {
 
     /**
      * I'll declare and build the client here
@@ -70,6 +80,18 @@ public class MainActivity extends AppCompatActivity implements RecyclerViewItemL
     @BindView(R.id.recyclerCategoriesHorizontal)
     RecyclerView recyclerViewCategories;
 
+    @BindView(R.id.refreshContainer)
+    SwipeRefreshLayout refreshLayout;
+
+    @BindView(R.id.toolbar)
+    Toolbar toolbar;
+
+    @BindView(R.id.drawer_layout)
+    DrawerLayout drawer;
+
+    @BindView(R.id.nav_view)
+    NavigationView navigationView;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -77,7 +99,28 @@ public class MainActivity extends AppCompatActivity implements RecyclerViewItemL
         unbinder = ButterKnife.bind(this);
         AppCompatDelegate.setCompatVectorFromResourcesEnabled(true);
         getCategoriesData();
+
+        toolbar.setTitle(getString(R.string.app_name));
+        setSupportActionBar(toolbar);
+
+        refreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                getGeneralStoriesData();
+            }
+        });
+
+        refreshLayout.setRefreshing(true);
         getGeneralStoriesData();
+
+
+        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
+                this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
+        drawer.setDrawerListener(toggle);
+        toggle.syncState();
+
+        navigationView.setNavigationItemSelectedListener(this);
+
     }
 
     private void getCategoriesData() {
@@ -127,6 +170,7 @@ public class MainActivity extends AppCompatActivity implements RecyclerViewItemL
         Log.d(LOG_TAG, body.toString());
         recyclerView.setLayoutManager(new GridLayoutManager(this, 2));
         recyclerView.setAdapter(new MainStoryAdapter(body, this, this));
+        refreshLayout.setRefreshing(false);
     }
 
     @Override
@@ -152,5 +196,35 @@ public class MainActivity extends AppCompatActivity implements RecyclerViewItemL
             startActivity(intent);
         }
 
+    }
+
+    @Override
+    public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+        int id = item.getItemId();
+
+        if (id == R.id.nav_camera) {
+            Snackbar.make(getCurrentFocus(), "Pendiente", Snackbar.LENGTH_SHORT).show();
+        } else if (id == R.id.nav_gallery) {
+            Snackbar.make(getCurrentFocus(), "Pendiente", Snackbar.LENGTH_SHORT).show();
+        } else if (id == R.id.nav_slideshow) {
+            Snackbar.make(getCurrentFocus(), "Pendiente", Snackbar.LENGTH_SHORT).show();
+        } else if (id == R.id.nav_share) {
+            Snackbar.make(getCurrentFocus(), "Pendiente", Snackbar.LENGTH_SHORT).show();
+        } else if (id == R.id.nav_send) {
+            Snackbar.make(getCurrentFocus(), "Pendiente", Snackbar.LENGTH_SHORT).show();
+        }
+
+        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        drawer.closeDrawer(GravityCompat.START);
+        return true;
+    }
+
+    @Override
+    public void onBackPressed() {
+        if (drawer.isDrawerOpen(GravityCompat.START)) {
+            drawer.closeDrawer(GravityCompat.START);
+        } else {
+            super.onBackPressed();
+        }
     }
 }
