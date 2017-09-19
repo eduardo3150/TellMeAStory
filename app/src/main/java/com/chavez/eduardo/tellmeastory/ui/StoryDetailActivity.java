@@ -288,6 +288,11 @@ public class StoryDetailActivity extends AppCompatActivity implements AppBarLayo
         }
     }
 
+    @Override
+    protected void onPause() {
+        speakRequest.onDestroy();
+        super.onPause();
+    }
 
     private void animateButtons() {
         ObjectAnimator.ofFloat(fab, "rotation", 0f, 360f).setDuration(600).start();
@@ -331,17 +336,6 @@ public class StoryDetailActivity extends AppCompatActivity implements AppBarLayo
 
         @Override
         public CharSequence getPageTitle(int position) {
-            switch (position) {
-                case 0:
-                    return "SECTION 1";
-                case 1:
-                    return "SECTION 2";
-                case 2:
-                    return "SECTION 3";
-
-                case 3:
-                    return "SECTION 4";
-            }
             return null;
         }
     }

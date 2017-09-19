@@ -18,6 +18,7 @@ import com.chavez.eduardo.tellmeastory.network.GeneralStory;
 import com.squareup.picasso.Picasso;
 
 import java.util.List;
+import java.util.Locale;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -107,10 +108,10 @@ public class MainStoryAdapter extends RecyclerView.Adapter<MainStoryAdapter.View
         public boolean onMenuItemClick(MenuItem item) {
             switch (item.getItemId()) {
                 case R.id.action_add_favourite:
-                    Snackbar.make(view,"Agregado a favoritos", Snackbar.LENGTH_SHORT).show();
+                    Snackbar.make(view, String.format(Locale.ENGLISH, "%1$d Agregado a favoritos", position), Snackbar.LENGTH_SHORT).show();
                     return true;
                 case R.id.action_play_next:
-                    Snackbar.make(view,"Editar", Snackbar.LENGTH_SHORT).show();
+                    Snackbar.make(view, "Editar", Snackbar.LENGTH_SHORT).show();
                     return true;
                 default:
             }
