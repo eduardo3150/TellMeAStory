@@ -1,12 +1,17 @@
 package com.chavez.eduardo.tellmeastory.recyclerview;
 
 import android.content.Context;
+import android.support.design.widget.Snackbar;
+import android.support.v7.widget.PopupMenu;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.chavez.eduardo.tellmeastory.R;
 import com.chavez.eduardo.tellmeastory.network.GeneralStory;
@@ -40,7 +45,7 @@ public class MainStoryAdapter extends RecyclerView.Adapter<MainStoryAdapter.View
     }
 
     @Override
-    public void onBindViewHolder(final ViewHolder holder, int position) {
+    public void onBindViewHolder(final ViewHolder holder, final int position) {
         final GeneralStory story = generalStories.get(position);
         holder.story_title.setText(story.getStoryName());
         Picasso.with(context).load(story.getStoryThumbnail()).into(holder.story_thumbnail);
@@ -51,6 +56,21 @@ public class MainStoryAdapter extends RecyclerView.Adapter<MainStoryAdapter.View
             }
         });
 
+        holder.story_menu.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                showMenu(holder.story_menu, position);
+            }
+        });
+
+    }
+
+    private void showMenu(View view, int position) {
+        PopupMenu popup = new PopupMenu(context, view);
+        MenuInflater inflater = popup.getMenuInflater();
+        inflater.inflate(R.menu.menu_story, popup.getMenu());
+        popup.setOnMenuItemClickListener(new MyMenuItemClickListener(position, view));
+        popup.show();
     }
 
     @Override
@@ -65,9 +85,37 @@ public class MainStoryAdapter extends RecyclerView.Adapter<MainStoryAdapter.View
         @BindView(R.id.row_story_title)
         TextView story_title;
 
+        @BindView(R.id.row_menu_trigger)
+        ImageView story_menu;
+
         public ViewHolder(View itemView) {
             super(itemView);
             ButterKnife.bind(this, itemView);
+        }
+    }
+
+    private class MyMenuItemClickListener implements PopupMenu.OnMenuItemClickListener {
+        private int position;
+        private View view;
+
+        public MyMenuItemClickListener(int position, View view) {
+            this.position = position;
+            this.view = view;
+        }
+
+        @Override
+        public boolean onMenuItemClick(MenuItem item) {
+            switch (item.getItemId()) {
+                case R.id.action_add_favourite:
+                    Snackbar.make(view,"Agregado a favoritos", Snackbar.LENGTH_SHORT).show();
+                    return true;
+                case R.id.action_play_next:
+                    Snackbar.make(view,"Editar", Snackbar.LENGTH_SHORT).show();
+                    return true;
+                default:
+            }
+
+            return false;
         }
     }
 }

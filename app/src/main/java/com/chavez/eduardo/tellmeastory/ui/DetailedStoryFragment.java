@@ -1,9 +1,10 @@
 package com.chavez.eduardo.tellmeastory.ui;
 
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
-import android.util.Log;
+import android.support.v4.view.animation.FastOutLinearInInterpolator;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -13,6 +14,11 @@ import android.widget.TextView;
 import com.chavez.eduardo.tellmeastory.R;
 import com.chavez.eduardo.tellmeastory.network.DetailedStory;
 import com.squareup.picasso.Picasso;
+import com.transitionseverywhere.Fade;
+import com.transitionseverywhere.Transition;
+import com.transitionseverywhere.TransitionManager;
+import com.transitionseverywhere.TransitionSet;
+import com.transitionseverywhere.extra.Scale;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -38,6 +44,9 @@ public class DetailedStoryFragment extends Fragment {
 
     @BindView(R.id.section_image)
     ImageView storyDetailedImage;
+
+    @BindView(R.id.cardContainer)
+    ViewGroup viewGroup;
 
     public static final String LOG_TAG = DetailedStoryFragment.class.getSimpleName();
 
@@ -69,7 +78,6 @@ public class DetailedStoryFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
         if (getArguments().getSerializable(DETAILED_STORY) != null) {
             DetailedStory story = (DetailedStory) getArguments().getSerializable(DETAILED_STORY);
-            Log.d(LOG_TAG, story.toString());
             populateView(story);
         }
     }
@@ -77,7 +85,13 @@ public class DetailedStoryFragment extends Fragment {
     private void populateView(DetailedStory story) {
         storyDetailedTitle.setText(story.getSectionTitle());
         storyDetailedContent.setText(story.getSectionText());
-        Picasso.with(getContext()).load(story.getSectionImage()).into(storyDetailedImage);
+        Picasso.with(getContext()).load(story.getSectionImage()).noFade().into(storyDetailedImage);
+        final Handler handler = new Handler();
+        handler.postDelayed(new Runnable() {
+            @Override public void run() {
+                animateInitialView();
+            }
+        }, 250);
     }
 
     @Override
@@ -85,4 +99,46 @@ public class DetailedStoryFragment extends Fragment {
         super.onDestroy();
         unbinder.unbind();
     }
+
+
+
+    private void animateInitialView() {
+        TransitionSet set = new TransitionSet()
+                .addTransition(new Scale(0.7f))
+                .addTransition(new Fade())
+                .setInterpolator(new FastOutLinearInInterpolator())
+                .addListener(new Transition.TransitionListener() {
+                    @Override
+                    public void onTransitionStart(Transition transition) {
+
+                    }
+
+                    @Override
+                    public void onTransitionEnd(Transition transition) {
+
+                    }
+
+                    @Override
+                    public void onTransitionCancel(Transition transition) {
+
+                    }
+
+                    @Override
+                    public void onTransitionPause(Transition transition) {
+
+                    }
+
+                    @Override
+                    public void onTransitionResume(Transition transition) {
+
+                    }
+                });
+        TransitionManager.beginDelayedTransition(viewGroup, set);
+        storyDetailedImage.setVisibility(View.VISIBLE);
+        storyDetailedTitle.setVisibility(View.VISIBLE);
+        storyDetailedContent.setVisibility(View.VISIBLE);
+    }
+
+
+
 }

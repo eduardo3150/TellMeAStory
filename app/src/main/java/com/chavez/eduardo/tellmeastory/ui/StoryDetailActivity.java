@@ -1,7 +1,13 @@
 package com.chavez.eduardo.tellmeastory.ui;
 
+import android.animation.ObjectAnimator;
+import android.os.Build;
+import android.os.Handler;
+import android.speech.tts.UtteranceProgressListener;
+import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
+import android.support.v4.view.ViewCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 
@@ -14,11 +20,23 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
+import android.widget.ImageView;
 
 import com.chavez.eduardo.tellmeastory.R;
 import com.chavez.eduardo.tellmeastory.network.GeneralStory;
+import com.chavez.eduardo.tellmeastory.utils.ConfigurationUtils;
+import com.chavez.eduardo.tellmeastory.utils.SpeakRequest;
+import com.squareup.picasso.Callback;
+import com.squareup.picasso.Picasso;
+import com.transitionseverywhere.Rotate;
+import com.transitionseverywhere.TransitionManager;
 
-public class StoryDetailActivity extends AppCompatActivity {
+import butterknife.BindView;
+import butterknife.ButterKnife;
+import butterknife.Unbinder;
+
+public class StoryDetailActivity extends AppCompatActivity implements AppBarLayout.OnOffsetChangedListener {
 
     /**
      * The {@link android.support.v4.view.PagerAdapter} that will provide
@@ -33,47 +51,194 @@ public class StoryDetailActivity extends AppCompatActivity {
     /**
      * The {@link ViewPager} that will host the section contents.
      */
-    private ViewPager mViewPager;
+    @BindView(R.id.container)
+    ViewPager mViewPager;
 
     private GeneralStory story;
 
     private static final String LOG_TAG = StoryDetailActivity.class.getSimpleName();
 
+    Bundle extras;
+
+    @BindView(R.id.tab_header)
+    ImageView headerReceived;
+
+    Unbinder unbinder;
+
+
+    private static final int PERCENTAGE_TO_SHOW_IMAGE = 20;
+    private int mMaxScrollSize;
+    private boolean mIsImageHidden;
+
+    @BindView(R.id.fab)
+    FloatingActionButton fab;
+
+    @BindView(R.id.appbar)
+    AppBarLayout appBarLayout;
+
+    @BindView(R.id.toolbar)
+    Toolbar toolbar;
+
+    @BindView(R.id.viewGroupContainer)
+    ViewGroup viewGroup;
+    //GOOGLE TTS
+    private SpeakRequest speakRequest;
+    private int whereAmISpeaking = 0;
+    private boolean rotated;
+
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_story_detail);
-
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
-        if (getSupportActionBar() != null)
-            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-
+        unbinder = ButterKnife.bind(this);
 
         if (getIntent().getExtras() != null) {
-            story = (GeneralStory) getIntent().getSerializableExtra("story");
-            Log.d(LOG_TAG, story.toString());
+            extras = getIntent().getExtras();
+            story = (GeneralStory) extras.getSerializable(ConfigurationUtils.BUNDLE_MAIN_KEY);
+
         }
+
+        toolbar.setTitle(story.getStoryName());
+        setSupportActionBar(toolbar);
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+            toolbar.setNavigationOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    onBackPressed();
+                }
+            });
+        }
+
+        generateHeader();
 
 
         // Create the adapter that will return a fragment for each of the three
         // primary sections of the activity.
         mSectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager());
 
-        // Set up the ViewPager with the sections adapter.
-        mViewPager = (ViewPager) findViewById(R.id.container);
-        mViewPager.setAdapter(mSectionsPagerAdapter);
+        setUpViewPager(mSectionsPagerAdapter);
 
 
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
+        speakRequest = new SpeakRequest(this);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
+                if (story != null && !speakRequest.isSpeaking()) {
+                    speakRequest.speak(story.getDetailedStories().get(whereAmISpeaking).getSectionText());
+                    Snackbar.make(view, "Reproduciendo", Snackbar.LENGTH_LONG)
+                            .setAction("Stop", new View.OnClickListener() {
+                                @Override
+                                public void onClick(View view) {
+                                    if (speakRequest.isSpeaking())
+                                        speakRequest.stopSpeak();
+                                }
+                            }).show();
+                    animateButtons();
+                }
+
+                if (speakRequest.isSpeaking()) {
+                    speakRequest.stopSpeak();
+                    animateButtons();
+                }
+
             }
         });
 
+        appBarLayout.addOnOffsetChangedListener(this);
+        listenToFinishedText();
+    }
+
+    private void listenToFinishedText() {
+        speakRequest.getTextToSpeech().setOnUtteranceProgressListener(new UtteranceProgressListener() {
+            @Override
+            public void onStart(String s) {
+
+            }
+
+            @Override
+            public void onDone(String s) {
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        animateButtons();
+                    }
+                });
+
+            }
+
+            @Override
+            public void onError(String s) {
+
+            }
+        });
+    }
+
+
+    private void generateHeader() {
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            String transitionName = extras.getString("transition");
+            headerReceived.setTransitionName(transitionName);
+            Picasso.with(this)
+                    .load(story.getStoryThumbnail())
+                    .noFade()
+                    .into(headerReceived, new Callback() {
+                        @Override
+                        public void onSuccess() {
+                            supportStartPostponedEnterTransition();
+                        }
+
+                        @Override
+                        public void onError() {
+                            supportPostponeEnterTransition();
+                        }
+                    });
+        } else {
+            Picasso.with(this)
+                    .load(story.getStoryThumbnail())
+                    .noFade()
+                    .into(headerReceived, new Callback() {
+                        @Override
+                        public void onSuccess() {
+                            supportStartPostponedEnterTransition();
+                        }
+
+                        @Override
+                        public void onError() {
+                            supportPostponeEnterTransition();
+                        }
+                    });
+        }
+    }
+
+    private void setUpViewPager(SectionsPagerAdapter mSectionsPagerAdapter) {
+        mViewPager.setAdapter(mSectionsPagerAdapter);
+        mViewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
+            @Override
+            public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
+
+            }
+
+            @Override
+            public void onPageSelected(int position) {
+                if (speakRequest.isSpeaking()) {
+                    speakRequest.stopSpeak();
+                    whereAmISpeaking = position;
+                    animateButtons();
+                } else {
+                    whereAmISpeaking = position;
+                }
+
+            }
+
+            @Override
+            public void onPageScrollStateChanged(int state) {
+
+            }
+        });
     }
 
 
@@ -97,6 +262,48 @@ public class StoryDetailActivity extends AppCompatActivity {
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void onOffsetChanged(AppBarLayout appBarLayout, int verticalOffset) {
+        if (mMaxScrollSize == 0)
+            mMaxScrollSize = appBarLayout.getTotalScrollRange();
+
+        int currentScrollPercentage = (Math.abs(verticalOffset)) * 100
+                / mMaxScrollSize;
+
+        if (currentScrollPercentage >= PERCENTAGE_TO_SHOW_IMAGE) {
+            if (!mIsImageHidden) {
+                mIsImageHidden = true;
+
+                ViewCompat.animate(fab).scaleY(0).scaleX(0).start();
+            }
+        }
+
+        if (currentScrollPercentage < PERCENTAGE_TO_SHOW_IMAGE) {
+            if (mIsImageHidden) {
+                mIsImageHidden = false;
+                ViewCompat.animate(fab).scaleY(1).scaleX(1).start();
+            }
+        }
+    }
+
+
+    private void animateButtons() {
+        ObjectAnimator.ofFloat(fab, "rotation", 0f, 360f).setDuration(600).start();
+        final Handler handler = new Handler();
+        handler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                if (rotated) {
+                    fab.setImageDrawable(getResources().getDrawable(R.drawable.ic_play_arrow_24dp));
+                    rotated = false;
+                } else {
+                    fab.setImageDrawable(getResources().getDrawable(R.drawable.ic_stop_24dp));
+                    rotated = true;
+                }
+            }
+        }, 400);
     }
 
     /**
