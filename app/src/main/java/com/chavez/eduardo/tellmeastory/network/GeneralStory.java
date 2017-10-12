@@ -1,34 +1,63 @@
 package com.chavez.eduardo.tellmeastory.network;
 
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
 import com.google.gson.annotations.SerializedName;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
  * Created by eduardo3150 on 9/18/17.
  */
 
-public class GeneralStory implements Serializable {
+public class GeneralStory implements Parcelable {
 
-    @SerializedName("id_story")
+    @SerializedName("id")
     private int idStory;
 
     @SerializedName("story_name")
     private String storyName;
 
-    @SerializedName("story_author")
-    private int storyAuthor;
+    @SerializedName("author_id")
+    private int authorId;
 
-    @SerializedName("approved")
-    private boolean approved;
+    @SerializedName("status_id")
+    private int statusId;
 
     @SerializedName("story_thumbnail")
     private String storyThumbnail;
 
-    @SerializedName("story_content")
-    private List<DetailedStory> detailedStories;
+    @SerializedName("content")
+    private List<DetailedStory> detailedStories = new ArrayList<>();
+
+    @SerializedName("category_data")
+    private Categories category;
+
+    protected GeneralStory(Parcel in) {
+        idStory = in.readInt();
+        storyName = in.readString();
+        authorId = in.readInt();
+        statusId = in.readInt();
+        storyThumbnail = in.readString();
+        in.readList(detailedStories, DetailedStory.class.getClassLoader());
+        category = in.readParcelable(Categories.class.getClassLoader());
+    }
+
+    public static final Creator<GeneralStory> CREATOR = new Creator<GeneralStory>() {
+        @Override
+        public GeneralStory createFromParcel(Parcel in) {
+            return new GeneralStory(in);
+        }
+
+        @Override
+        public GeneralStory[] newArray(int size) {
+            return new GeneralStory[size];
+        }
+    };
 
     public int getIdStory() {
         return idStory;
@@ -38,12 +67,12 @@ public class GeneralStory implements Serializable {
         return storyName;
     }
 
-    public int getStoryAuthor() {
-        return storyAuthor;
+    public int getAuthorId() {
+        return authorId;
     }
 
-    public boolean isApproved() {
-        return approved;
+    public int getStatusId() {
+        return statusId;
     }
 
     public List<DetailedStory> getDetailedStories() {
@@ -55,17 +84,32 @@ public class GeneralStory implements Serializable {
     }
 
 
-
-
     @Override
     public String toString() {
-        return "\nGeneralStory{" +
+        return "GeneralStory{" +
                 "idStory=" + idStory +
                 ", storyName='" + storyName + '\'' +
-                ", storyAuthor=" + storyAuthor +
-                ", approved=" + approved +
+                ", authorId=" + authorId +
+                ", statusId=" + statusId +
                 ", storyThumbnail='" + storyThumbnail + '\'' +
                 ", detailedStories=" + detailedStories +
+                ", category=" + category +
                 '}';
+    }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel parcel, int i) {
+        parcel.writeInt(idStory);
+        parcel.writeString(storyName);
+        parcel.writeInt(authorId);
+        parcel.writeInt(statusId);
+        parcel.writeString(storyThumbnail);
+        parcel.writeList(detailedStories);
+        parcel.writeParcelable(category, i);
     }
 }

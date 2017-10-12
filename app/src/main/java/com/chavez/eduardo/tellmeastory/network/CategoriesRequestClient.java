@@ -10,6 +10,6 @@ import retrofit2.http.GET;
  */
 
 public interface CategoriesRequestClient {
-    @GET("1675778/raw")
+    @GET("categories")
     Call<List<Categories>> getAllCategories();
 }

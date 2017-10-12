@@ -37,6 +37,8 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.Unbinder;
 
+import static com.chavez.eduardo.tellmeastory.network.NetworkUtils.IMG_BASE_URL;
+
 public class StoryDetailActivity extends AppCompatActivity implements AppBarLayout.OnOffsetChangedListener {
 
     /**
@@ -97,7 +99,8 @@ public class StoryDetailActivity extends AppCompatActivity implements AppBarLayo
         AppCompatDelegate.setCompatVectorFromResourcesEnabled(true);
         if (getIntent().getExtras() != null) {
             extras = getIntent().getExtras();
-            story = (GeneralStory) extras.getSerializable(ConfigurationUtils.BUNDLE_MAIN_KEY);
+            story = (GeneralStory) extras.getParcelable(ConfigurationUtils.BUNDLE_MAIN_KEY);
+            Log.d(LOG_TAG, story.toString());
 
         }
 
@@ -212,7 +215,7 @@ public class StoryDetailActivity extends AppCompatActivity implements AppBarLayo
             String transitionName = extras.getString("transition");
             headerReceived.setTransitionName(transitionName);
             Picasso.with(this)
-                    .load(story.getStoryThumbnail())
+                    .load(IMG_BASE_URL+story.getStoryThumbnail())
                     .noFade()
                     .into(headerReceived, new Callback() {
                         @Override
@@ -227,7 +230,7 @@ public class StoryDetailActivity extends AppCompatActivity implements AppBarLayo
                     });
         } else {
             Picasso.with(this)
-                    .load(story.getStoryThumbnail())
+                    .load(IMG_BASE_URL+story.getStoryThumbnail())
                     .noFade()
                     .into(headerReceived, new Callback() {
                         @Override

@@ -24,6 +24,8 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.Unbinder;
 
+import static com.chavez.eduardo.tellmeastory.network.NetworkUtils.IMG_BASE_URL;
+
 /**
  * A placeholder fragment containing a simple view.
  */
@@ -60,7 +62,7 @@ public class DetailedStoryFragment extends Fragment {
     public static DetailedStoryFragment newInstance(DetailedStory story) {
         DetailedStoryFragment fragment = new DetailedStoryFragment();
         Bundle args = new Bundle();
-        args.putSerializable(DETAILED_STORY, story);
+        args.putParcelable(DETAILED_STORY, story);
         fragment.setArguments(args);
         return fragment;
     }
@@ -76,8 +78,8 @@ public class DetailedStoryFragment extends Fragment {
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        if (getArguments().getSerializable(DETAILED_STORY) != null) {
-            DetailedStory story = (DetailedStory) getArguments().getSerializable(DETAILED_STORY);
+        if (getArguments().getParcelable(DETAILED_STORY) != null) {
+            DetailedStory story = getArguments().getParcelable(DETAILED_STORY);
             populateView(story);
         }
     }
@@ -85,7 +87,7 @@ public class DetailedStoryFragment extends Fragment {
     private void populateView(DetailedStory story) {
         storyDetailedTitle.setText(story.getSectionTitle());
         storyDetailedContent.setText(story.getSectionText());
-        Picasso.with(getContext()).load(story.getSectionImage()).noFade().into(storyDetailedImage);
+        Picasso.with(getContext()).load(IMG_BASE_URL+story.getSectionImage()).noFade().into(storyDetailedImage);
         final Handler handler = new Handler();
         handler.postDelayed(new Runnable() {
             @Override public void run() {

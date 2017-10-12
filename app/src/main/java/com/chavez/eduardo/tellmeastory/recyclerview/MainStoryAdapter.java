@@ -23,6 +23,8 @@ import java.util.Locale;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
+import static com.chavez.eduardo.tellmeastory.network.NetworkUtils.IMG_BASE_URL;
+
 /**
  * Created by eduardo3150 on 9/18/17.
  */
@@ -49,7 +51,7 @@ public class MainStoryAdapter extends RecyclerView.Adapter<MainStoryAdapter.View
     public void onBindViewHolder(final ViewHolder holder, final int position) {
         final GeneralStory story = generalStories.get(position);
         holder.story_title.setText(story.getStoryName());
-        Picasso.with(context).load(story.getStoryThumbnail()).into(holder.story_thumbnail);
+        Picasso.with(context).load(IMG_BASE_URL+story.getStoryThumbnail()).into(holder.story_thumbnail);
         holder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {

@@ -11,6 +11,6 @@ import retrofit2.http.GET;
 
 public interface StoriesRequestClient {
 
-    @GET("1675587/raw")
+    @GET("stories")
     Call<List<GeneralStory>> getGeneralStories();
 }

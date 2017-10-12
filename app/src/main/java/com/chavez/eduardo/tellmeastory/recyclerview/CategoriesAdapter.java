@@ -17,6 +17,8 @@ import java.util.List;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
+import static com.chavez.eduardo.tellmeastory.network.NetworkUtils.IMG_BASE_URL;
+
 /**
  * Created by eduardo3150 on 9/18/17.
  */
@@ -41,7 +43,7 @@ public class CategoriesAdapter extends RecyclerView.Adapter<CategoriesAdapter.Vi
         Categories category = categories.get(position);
 
         holder.categoryLabel.setText(category.getCategoryName());
-        Picasso.with(context).load(category.getCategoryThumbnail()).into(holder.categoryPicture);
+        Picasso.with(context).load(IMG_BASE_URL+category.getCategoryThumbnail()).into(holder.categoryPicture);
     }
 
     @Override
