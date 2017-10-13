@@ -1,5 +1,7 @@
 package com.chavez.eduardo.tellmeastory.ui;
 
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.Nullable;
@@ -13,6 +15,8 @@ import android.widget.TextView;
 
 import com.chavez.eduardo.tellmeastory.R;
 import com.chavez.eduardo.tellmeastory.network.DetailedStory;
+import com.chavez.eduardo.tellmeastory.network.NetworkUtils;
+import com.chavez.eduardo.tellmeastory.utils.ConfigurationUtils;
 import com.squareup.picasso.Picasso;
 import com.transitionseverywhere.Fade;
 import com.transitionseverywhere.Transition;
@@ -85,9 +89,11 @@ public class DetailedStoryFragment extends Fragment {
     }
 
     private void populateView(DetailedStory story) {
+        SharedPreferences sharedPreferences = this.getActivity().getSharedPreferences(ConfigurationUtils.PREF_KEY, Context.MODE_PRIVATE);
+        String BASE_URL = sharedPreferences.getString(ConfigurationUtils.IP_VALUE_KEY, NetworkUtils.SERVICE_BASE_URL);
         storyDetailedTitle.setText(story.getSectionTitle());
         storyDetailedContent.setText(story.getSectionText());
-        Picasso.with(getContext()).load(IMG_BASE_URL+story.getSectionImage()).noFade().into(storyDetailedImage);
+        Picasso.with(getContext()).load(BASE_URL+story.getSectionImage()).noFade().into(storyDetailedImage);
         final Handler handler = new Handler();
         handler.postDelayed(new Runnable() {
             @Override public void run() {

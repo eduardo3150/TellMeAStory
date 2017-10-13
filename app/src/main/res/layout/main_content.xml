@@ -4,95 +4,72 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:fillViewport="true"
     app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
-    <android.support.v4.widget.NestedScrollView
+    <TextView
+        android:id="@+id/recycler_category_label"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentTop="true"
+        android:layout_marginLeft="8dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        android:text="Filtra por categorias"
+        android:textAppearance="?android:textAppearanceSmall" />
+
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/recyclerCategoriesHorizontal"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:fillViewport="true"
-        >
+        android:layout_height="wrap_content"
+        android:layout_below="@id/recycler_category_label"
+        android:layout_marginEnd="8dp"
+        android:layout_marginLeft="8dp"
+        android:layout_marginRight="8dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp" />
 
-        <android.support.constraint.ConstraintLayout
+    <View
+        android:id="@+id/separator"
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_below="@id/recyclerCategoriesHorizontal"
+        android:alpha="0.12"
+        android:background="@android:color/black" />
+
+    <TextView
+        android:id="@+id/recycler_stories_label"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/separator"
+        android:layout_marginLeft="8dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        android:text="Historias"
+        android:textAppearance="?android:textAppearanceSmall" />
+
+    <android.support.v4.widget.SwipeRefreshLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:id="@+id/refreshContainer"
+        android:layout_below="@id/recycler_stories_label"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <com.chavez.eduardo.tellmeastory.recyclerview.GridRecyclerView
+            android:id="@+id/recyclerContentVertical"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:fillViewport="true">
+            android:layout_height="match_parent" />
+    </android.support.v4.widget.SwipeRefreshLayout>
 
-            <TextView
-                android:id="@+id/recycler_category_label"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginLeft="8dp"
-                android:layout_marginStart="8dp"
-                android:layout_marginTop="8dp"
-                android:text="Filtra por categorias"
-                android:textAppearance="?android:textAppearanceSmall"
-                app:layout_constraintLeft_toLeftOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
 
-            <android.support.v7.widget.RecyclerView
-                android:id="@+id/recyclerCategoriesHorizontal"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_marginEnd="8dp"
-                android:layout_marginLeft="8dp"
-                android:layout_marginRight="8dp"
-                android:layout_marginStart="8dp"
-                android:layout_marginTop="8dp"
-                app:layout_constraintLeft_toLeftOf="parent"
-                app:layout_constraintRight_toRightOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/recycler_category_label" />
+    <TextView
+        android:layout_below="@id/recycler_stories_label"
+        android:id="@+id/empty_message"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Sin historias"
+        android:layout_marginTop="24dp"
+        android:visibility="gone"
+        android:textAppearance="?android:textAppearanceLarge"
+        android:layout_centerHorizontal="true" />
 
-            <View
-                android:id="@+id/separator"
-                android:layout_width="0dp"
-                android:layout_height="1dp"
-                android:alpha="0.12"
-                android:background="@android:color/black"
-                app:layout_constraintLeft_toLeftOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/recyclerCategoriesHorizontal" />
-
-            <TextView
-                android:id="@+id/recycler_stories_label"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginLeft="8dp"
-                android:layout_marginStart="8dp"
-                android:layout_marginTop="8dp"
-                android:text="Historias"
-                android:textAppearance="?android:textAppearanceSmall"
-                app:layout_constraintLeft_toLeftOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/separator" />
-
-            <android.support.v4.widget.SwipeRefreshLayout xmlns:android="http://schemas.android.com/apk/res/android"
-                android:id="@+id/refreshContainer"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_marginEnd="8dp"
-                android:layout_marginLeft="8dp"
-                android:layout_marginRight="8dp"
-                android:layout_marginStart="8dp"
-                android:layout_marginTop="16dp"
-                app:layout_constraintLeft_toLeftOf="parent"
-                app:layout_constraintRight_toRightOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/recycler_stories_label">
-
-                <com.chavez.eduardo.tellmeastory.recyclerview.GridRecyclerView
-                    android:id="@+id/recyclerContentVertical"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent" />
-            </android.support.v4.widget.SwipeRefreshLayout>
-
-            <TextView
-                android:id="@+id/empty_message"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Sin historias"
-                android:textAppearance="?android:textAppearanceLarge"
-                android:visibility="gone"
-                app:layout_constraintLeft_toLeftOf="parent"
-                app:layout_constraintRight_toRightOf="parent"
-                app:layout_constraintTop_toTopOf="@+id/refreshContainer" />
-        </android.support.constraint.ConstraintLayout>
-    </android.support.v4.widget.NestedScrollView>
 </RelativeLayout>

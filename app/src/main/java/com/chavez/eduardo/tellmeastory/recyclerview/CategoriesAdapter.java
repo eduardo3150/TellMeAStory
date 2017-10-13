@@ -1,6 +1,7 @@
 package com.chavez.eduardo.tellmeastory.recyclerview;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -10,6 +11,8 @@ import android.widget.TextView;
 
 import com.chavez.eduardo.tellmeastory.R;
 import com.chavez.eduardo.tellmeastory.network.Categories;
+import com.chavez.eduardo.tellmeastory.network.NetworkUtils;
+import com.chavez.eduardo.tellmeastory.utils.ConfigurationUtils;
 import com.squareup.picasso.Picasso;
 
 import java.util.List;
@@ -27,11 +30,14 @@ public class CategoriesAdapter extends RecyclerView.Adapter<CategoriesAdapter.Vi
     private Context context;
     private List<Categories> categories;
     private RecyclerFilterListAdapter listAdapter;
+    String BASE_URL;
 
     public CategoriesAdapter(Context context, List<Categories> categories, RecyclerFilterListAdapter adapter) {
         this.context = context;
         this.categories = categories;
         this.listAdapter = adapter;
+        SharedPreferences sharedPreferences = context.getSharedPreferences(ConfigurationUtils.PREF_KEY, Context.MODE_PRIVATE);
+        BASE_URL = sharedPreferences.getString(ConfigurationUtils.IP_VALUE_KEY, NetworkUtils.SERVICE_BASE_URL);
     }
 
     @Override
@@ -43,8 +49,9 @@ public class CategoriesAdapter extends RecyclerView.Adapter<CategoriesAdapter.Vi
     @Override
     public void onBindViewHolder(CategoriesAdapter.ViewHolder holder, int position) {
         final Categories category = categories.get(position);
+
         holder.categoryLabel.setText(category.getCategoryName());
-        Picasso.with(context).load(IMG_BASE_URL+category.getCategoryThumbnail()).into(holder.categoryPicture);
+        Picasso.with(context).load(BASE_URL + category.getCategoryThumbnail()).into(holder.categoryPicture);
         holder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {

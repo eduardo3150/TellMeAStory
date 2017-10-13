@@ -1,7 +1,9 @@
 package com.chavez.eduardo.tellmeastory.ui;
 
 import android.animation.ObjectAnimator;
+import android.content.Context;
 import android.content.DialogInterface;
+import android.content.SharedPreferences;
 import android.os.Build;
 import android.os.Handler;
 import android.speech.tts.UtteranceProgressListener;
@@ -81,10 +83,7 @@ public class StoryDetailActivity extends AppCompatActivity implements AppBarLayo
 
     Unbinder unbinder;
 
-    StoriesRequestClient client = new Retrofit.Builder()
-            .baseUrl(SERVICE_BASE_URL)
-            .addConverterFactory(GsonConverterFactory.create())
-            .build().create(StoriesRequestClient.class);
+
 
     private static final int PERCENTAGE_TO_SHOW_IMAGE = 20;
     private int mMaxScrollSize;
@@ -140,6 +139,12 @@ public class StoryDetailActivity extends AppCompatActivity implements AppBarLayo
     }
 
     private void askForDetails(int storyId) {
+        SharedPreferences sharedPreferences = getSharedPreferences(ConfigurationUtils.PREF_KEY, Context.MODE_PRIVATE);
+        String BASE_URL = sharedPreferences.getString(ConfigurationUtils.IP_VALUE_KEY, NetworkUtils.SERVICE_BASE_URL);
+        StoriesRequestClient client = new Retrofit.Builder()
+                .baseUrl(BASE_URL+"/api/v1/")
+                .addConverterFactory(GsonConverterFactory.create())
+                .build().create(StoriesRequestClient.class);
         Call<GeneralStory> call = client.getStory(String.valueOf(storyId));
         call.enqueue(new retrofit2.Callback<GeneralStory>() {
             @Override
@@ -274,12 +279,14 @@ public class StoryDetailActivity extends AppCompatActivity implements AppBarLayo
 
 
     private void generateHeader(GeneralStory body) {
-
+        SharedPreferences sharedPreferences = getSharedPreferences(ConfigurationUtils.PREF_KEY, Context.MODE_PRIVATE);
+        String BASE_URL = sharedPreferences.getString(ConfigurationUtils.IP_VALUE_KEY, NetworkUtils.SERVICE_BASE_URL);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+
             String transitionName = extras.getString("transition");
             headerReceived.setTransitionName(transitionName);
             Picasso.with(this)
-                    .load(IMG_BASE_URL + body.getStoryThumbnail())
+                    .load(BASE_URL + body.getStoryThumbnail())
                     .noFade()
                     .into(headerReceived, new Callback() {
                         @Override
@@ -294,7 +301,7 @@ public class StoryDetailActivity extends AppCompatActivity implements AppBarLayo
                     });
         } else {
             Picasso.with(this)
-                    .load(IMG_BASE_URL + body.getStoryThumbnail())
+                    .load(BASE_URL + body.getStoryThumbnail())
                     .noFade()
                     .into(headerReceived, new Callback() {
                         @Override

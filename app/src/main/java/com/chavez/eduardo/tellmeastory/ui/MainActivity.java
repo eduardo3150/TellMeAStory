@@ -3,6 +3,7 @@ package com.chavez.eduardo.tellmeastory.ui;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Build;
 import android.support.annotation.NonNull;
 import android.support.design.widget.NavigationView;
@@ -56,18 +57,7 @@ import retrofit2.converter.gson.GsonConverterFactory;
 
 public class MainActivity extends AppCompatActivity implements RecyclerViewItemListener, NavigationView.OnNavigationItemSelectedListener, RecyclerFilterListAdapter {
 
-    /**
-     * I'll declare and build the client here
-     **/
-    private StoriesRequestClient client = new Retrofit.Builder()
-            .baseUrl(NetworkUtils.SERVICE_BASE_URL)
-            .addConverterFactory(GsonConverterFactory.create())
-            .build().create(StoriesRequestClient.class);
 
-    private CategoriesRequestClient categoriesClient = new Retrofit.Builder()
-            .baseUrl(NetworkUtils.SERVICE_BASE_URL)
-            .addConverterFactory(GsonConverterFactory.create())
-            .build().create(CategoriesRequestClient.class);
 
     /**
      * Just for debugging purposes
@@ -109,6 +99,12 @@ public class MainActivity extends AppCompatActivity implements RecyclerViewItemL
         setContentView(R.layout.activity_main);
         unbinder = ButterKnife.bind(this);
         AppCompatDelegate.setCompatVectorFromResourcesEnabled(true);
+
+        /**
+         * I'll declare and build the client here
+         **/
+
+
         getCategoriesData();
 
         toolbar.setTitle(getString(R.string.app_name));
@@ -153,6 +149,13 @@ public class MainActivity extends AppCompatActivity implements RecyclerViewItemL
     }
 
     private void getCategoriesData() {
+        SharedPreferences sharedPreferences = getSharedPreferences(ConfigurationUtils.PREF_KEY, Context.MODE_PRIVATE);
+        String BASE_URL = sharedPreferences.getString(ConfigurationUtils.IP_VALUE_KEY, NetworkUtils.SERVICE_BASE_URL);
+        CategoriesRequestClient categoriesClient = new Retrofit.Builder()
+                .baseUrl(BASE_URL+"/api/v1/")
+                .addConverterFactory(GsonConverterFactory.create())
+                .build().create(CategoriesRequestClient.class);
+
         Call<List<Categories>> call = categoriesClient.getAllCategories();
 
         call.enqueue(new Callback<List<Categories>>() {
@@ -183,6 +186,13 @@ public class MainActivity extends AppCompatActivity implements RecyclerViewItemL
     }
 
     private void getGeneralStoriesData() {
+        SharedPreferences sharedPreferences = getSharedPreferences(ConfigurationUtils.PREF_KEY, Context.MODE_PRIVATE);
+        String BASE_URL = sharedPreferences.getString(ConfigurationUtils.IP_VALUE_KEY, NetworkUtils.SERVICE_BASE_URL);
+        StoriesRequestClient client = new Retrofit.Builder()
+                .baseUrl(BASE_URL+"/api/v1/")
+                .addConverterFactory(GsonConverterFactory.create())
+                .build().create(StoriesRequestClient.class);
+
         Call<List<GeneralStory>> call = client.getGeneralStories();
         call.enqueue(new Callback<List<GeneralStory>>() {
             @Override
@@ -253,6 +263,13 @@ public class MainActivity extends AppCompatActivity implements RecyclerViewItemL
             Snackbar.make(getCurrentFocus(), "Pendiente", Snackbar.LENGTH_SHORT).show();
         } else if (id == R.id.nav_send) {
             Snackbar.make(getCurrentFocus(), "Pendiente", Snackbar.LENGTH_SHORT).show();
+            SharedPreferences sharedPreferences = getSharedPreferences(ConfigurationUtils.PREF_KEY, Context.MODE_PRIVATE);
+            SharedPreferences.Editor editor = sharedPreferences.edit();
+            editor.clear();
+            editor.apply();
+            startActivity(new Intent(MainActivity.this, LoginTemp.class));
+            MainActivity.this.finish();
+
         }
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);

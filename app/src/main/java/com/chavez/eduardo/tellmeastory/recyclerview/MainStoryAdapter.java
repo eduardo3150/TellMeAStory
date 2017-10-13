@@ -1,6 +1,7 @@
 package com.chavez.eduardo.tellmeastory.recyclerview;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.support.design.widget.Snackbar;
 import android.support.v7.widget.PopupMenu;
 import android.support.v7.widget.RecyclerView;
@@ -15,6 +16,8 @@ import android.widget.Toast;
 
 import com.chavez.eduardo.tellmeastory.R;
 import com.chavez.eduardo.tellmeastory.network.GeneralStory;
+import com.chavez.eduardo.tellmeastory.network.NetworkUtils;
+import com.chavez.eduardo.tellmeastory.utils.ConfigurationUtils;
 import com.squareup.picasso.Picasso;
 
 import java.util.List;
@@ -34,11 +37,14 @@ public class MainStoryAdapter extends RecyclerView.Adapter<MainStoryAdapter.View
     private List<GeneralStory> generalStories;
     private Context context;
     private RecyclerViewItemListener listener;
+    String BASE_URL;
 
     public MainStoryAdapter(Context context, RecyclerViewItemListener listener) {
         //this.generalStories = generalStories;
         this.context = context;
         this.listener = listener;
+        SharedPreferences sharedPreferences = context.getSharedPreferences(ConfigurationUtils.PREF_KEY, Context.MODE_PRIVATE);
+        BASE_URL = sharedPreferences.getString(ConfigurationUtils.IP_VALUE_KEY, NetworkUtils.SERVICE_BASE_URL);
     }
 
     @Override
@@ -50,8 +56,9 @@ public class MainStoryAdapter extends RecyclerView.Adapter<MainStoryAdapter.View
     @Override
     public void onBindViewHolder(final ViewHolder holder, final int position) {
         final GeneralStory story = generalStories.get(position);
+
         holder.story_title.setText(story.getStoryName());
-        Picasso.with(context).load(IMG_BASE_URL+story.getStoryThumbnail()).into(holder.story_thumbnail);
+        Picasso.with(context).load(BASE_URL+story.getStoryThumbnail()).into(holder.story_thumbnail);
         holder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
