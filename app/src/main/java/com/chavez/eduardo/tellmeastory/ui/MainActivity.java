@@ -2,6 +2,7 @@ package com.chavez.eduardo.tellmeastory.ui;
 
 
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Build;
@@ -14,6 +15,7 @@ import android.support.v4.view.ViewCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatDelegate;
@@ -165,12 +167,46 @@ public class MainActivity extends AppCompatActivity implements RecyclerViewItemL
                     workCategoriesResponse(response.body());
                 } else {
                     Log.d(LOG_TAG, "ERROR" + response.message());
+                    new AlertDialog.Builder(MainActivity.this)
+                            .setTitle("Atencion")
+                            .setCancelable(false)
+                            .setMessage("No se puede completar la solicitud")
+                            .setPositiveButton("Reintentar", new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialogInterface, int i) {
+                                    getGeneralStoriesData();
+                                }
+                            })
+                            .setNegativeButton("Salir", new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialogInterface, int i) {
+                                    MainActivity.this.finish();
+                                }
+                            })
+                            .show();
                 }
             }
 
             @Override
             public void onFailure(Call<List<Categories>> call, Throwable t) {
                 Log.d(LOG_TAG, t.getLocalizedMessage());
+                new AlertDialog.Builder(MainActivity.this)
+                        .setTitle("Atencion")
+                        .setCancelable(false)
+                        .setMessage("No se puede completar la solicitud")
+                        .setPositiveButton("Reintentar", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialogInterface, int i) {
+                                getCategoriesData();
+                            }
+                        })
+                        .setNegativeButton("Salir", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialogInterface, int i) {
+                                MainActivity.this.finish();
+                            }
+                        })
+                        .show();
             }
         });
 
@@ -197,13 +233,52 @@ public class MainActivity extends AppCompatActivity implements RecyclerViewItemL
         call.enqueue(new Callback<List<GeneralStory>>() {
             @Override
             public void onResponse(Call<List<GeneralStory>> call, Response<List<GeneralStory>> response) {
-                if (response.isSuccessful())
+                if (response.isSuccessful()) {
                     workResponse(response.body());
+                } else {
+                    refreshLayout.setRefreshing(false);
+                    new AlertDialog.Builder(MainActivity.this)
+                            .setTitle("Atencion")
+                            .setCancelable(false)
+                            .setMessage("No se puede completar la solicitud")
+                            .setPositiveButton("Reintentar", new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialogInterface, int i) {
+                                    getGeneralStoriesData();
+                                }
+                            })
+                            .setNegativeButton("Salir", new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialogInterface, int i) {
+                                    MainActivity.this.finish();
+                                }
+                            })
+                            .show();
+
+                }
             }
 
             @Override
             public void onFailure(Call<List<GeneralStory>> call, Throwable t) {
-
+                Log.d(LOG_TAG,t.getLocalizedMessage());
+                refreshLayout.setRefreshing(false);
+                new AlertDialog.Builder(MainActivity.this)
+                        .setTitle("Atencion")
+                        .setCancelable(false)
+                        .setMessage("No se puede completar la solicitud")
+                        .setPositiveButton("Reintentar", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialogInterface, int i) {
+                                getGeneralStoriesData();
+                            }
+                        })
+                        .setNegativeButton("Salir", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialogInterface, int i) {
+                                MainActivity.this.finish();
+                            }
+                        })
+                        .show();
             }
         });
     }
