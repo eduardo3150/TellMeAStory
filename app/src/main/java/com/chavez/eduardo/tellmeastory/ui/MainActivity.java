@@ -179,6 +179,7 @@ public class MainActivity extends AppCompatActivity implements RecyclerViewItemL
         recyclerViewCategories.setLayoutAnimation(animation);
         recyclerViewCategories.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
         recyclerViewCategories.setAdapter(new CategoriesAdapter(this, body, this));
+        recyclerViewCategories.setNestedScrollingEnabled(false);
     }
 
     private void getGeneralStoriesData() {
@@ -204,6 +205,7 @@ public class MainActivity extends AppCompatActivity implements RecyclerViewItemL
         recyclerView.setLayoutManager(new GridLayoutManager(this, 2));
         storyAdapter.swap(body);
         recyclerView.setAdapter(storyAdapter);
+        recyclerView.setNestedScrollingEnabled(true);
         if (body.isEmpty()){
             emptyMessage.setVisibility(View.VISIBLE);
         } else {
