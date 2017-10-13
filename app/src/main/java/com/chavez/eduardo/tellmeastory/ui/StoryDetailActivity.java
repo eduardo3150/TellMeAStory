@@ -1,6 +1,7 @@
 package com.chavez.eduardo.tellmeastory.ui;
 
 import android.animation.ObjectAnimator;
+import android.content.DialogInterface;
 import android.os.Build;
 import android.os.Handler;
 import android.speech.tts.UtteranceProgressListener;
@@ -9,6 +10,7 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.graphics.drawable.VectorDrawableCompat;
 import android.support.v4.view.ViewCompat;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.app.AppCompatDelegate;
 import android.support.v7.widget.Toolbar;
@@ -158,47 +160,6 @@ public class StoryDetailActivity extends AppCompatActivity implements AppBarLayo
         Log.d(LOG_TAG, body.toString());
         toolbar.setTitle(body.getStoryName());
         generateHeader(body);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-
-                if (firstAppearTTS) {
-                    firstAppearTTS = false;
-                    Snackbar.make(view, "Reproduccion lista", Snackbar.LENGTH_LONG)
-                            .show();
-                    rotated = true;
-                    animateButtons();
-                } else {
-                    if (body != null && !speakRequest.isSpeaking() && rotated) {
-                        speakRequest.speak(body.getDetailedStories().get(whereAmISpeaking).getSectionText());
-                        rotated = false;
-                        animateButtons();
-
-                        Snackbar.make(view, "Reproduciendo", Snackbar.LENGTH_LONG)
-                                .setAction("Detener", new View.OnClickListener() {
-                                    @Override
-                                    public void onClick(View view) {
-                                        if (speakRequest.isSpeaking()) {
-                                            speakRequest.stopSpeak();
-                                            rotated = true;
-                                            animateButtons();
-                                        }
-                                    }
-                                }).show();
-
-
-                    } else {
-                        speakRequest.stopSpeak();
-                        rotated = true;
-                        animateButtons();
-                        Snackbar.make(view, "Detenido", Snackbar.LENGTH_LONG)
-                                .show();
-                    }
-
-                }
-            }
-        });
-
 
         setSupportActionBar(toolbar);
         if (getSupportActionBar() != null) {
@@ -210,10 +171,71 @@ public class StoryDetailActivity extends AppCompatActivity implements AppBarLayo
                 }
             });
         }
-        mSectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager(), body.getDetailedStories());
 
-        setUpViewPager(mSectionsPagerAdapter, body);
+        if (body.getDetailedStories().isEmpty()){
+            new AlertDialog.Builder(this)
+                    .setTitle("Atencion")
+                    .setCancelable(false)
+                    .setMessage("Es necesario que la historia poseea secciones, porfavor contacta un administrador para verificar esta historia")
+                    .setPositiveButton("Reintentar", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialogInterface, int i) {
+                            askForDetails(storyId);
+                        }
+                    })
+                    .setNegativeButton("Salir", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialogInterface, int i) {
+                            StoryDetailActivity.this.finish();
+                        }
+                    })
+                    .show();
+        } else {
+            fab.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
 
+                    if (firstAppearTTS) {
+                        firstAppearTTS = false;
+                        Snackbar.make(view, "Reproduccion lista", Snackbar.LENGTH_LONG)
+                                .show();
+                        rotated = true;
+                        animateButtons();
+                    } else {
+                        if (body != null && !speakRequest.isSpeaking() && rotated) {
+                            speakRequest.speak(body.getDetailedStories().get(whereAmISpeaking).getSectionText());
+                            rotated = false;
+                            animateButtons();
+
+                            Snackbar.make(view, "Reproduciendo", Snackbar.LENGTH_LONG)
+                                    .setAction("Detener", new View.OnClickListener() {
+                                        @Override
+                                        public void onClick(View view) {
+                                            if (speakRequest.isSpeaking()) {
+                                                speakRequest.stopSpeak();
+                                                rotated = true;
+                                                animateButtons();
+                                            }
+                                        }
+                                    }).show();
+
+
+                        } else {
+                            speakRequest.stopSpeak();
+                            rotated = true;
+                            animateButtons();
+                            Snackbar.make(view, "Detenido", Snackbar.LENGTH_LONG)
+                                    .show();
+                        }
+
+                    }
+                }
+            });
+
+            mSectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager(), body.getDetailedStories());
+
+            setUpViewPager(mSectionsPagerAdapter, body);
+        }
     }
 
     private void listenToFinishedText() {
