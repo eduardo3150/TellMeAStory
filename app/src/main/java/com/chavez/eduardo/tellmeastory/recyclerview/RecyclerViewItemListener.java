@@ -10,5 +10,5 @@ import com.chavez.eduardo.tellmeastory.network.GeneralStory;
 
 public interface RecyclerViewItemListener {
 
-    void onRecyclerViewItemClick(int pos, GeneralStory generalStory, ImageView sharedImage);
+    void onRecyclerViewItemClick(int pos, int storyId, ImageView sharedImage);
 }

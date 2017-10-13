@@ -21,8 +21,13 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.view.animation.AnimationUtils;
+import android.view.animation.LayoutAnimationController;
 import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 
@@ -34,6 +39,7 @@ import com.chavez.eduardo.tellmeastory.network.StoriesRequestClient;
 import com.chavez.eduardo.tellmeastory.network.NetworkUtils;
 import com.chavez.eduardo.tellmeastory.recyclerview.CategoriesAdapter;
 import com.chavez.eduardo.tellmeastory.recyclerview.MainStoryAdapter;
+import com.chavez.eduardo.tellmeastory.recyclerview.RecyclerFilterListAdapter;
 import com.chavez.eduardo.tellmeastory.recyclerview.RecyclerViewItemListener;
 import com.chavez.eduardo.tellmeastory.utils.ConfigurationUtils;
 
@@ -48,7 +54,7 @@ import retrofit2.Response;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
-public class MainActivity extends AppCompatActivity implements RecyclerViewItemListener, NavigationView.OnNavigationItemSelectedListener {
+public class MainActivity extends AppCompatActivity implements RecyclerViewItemListener, NavigationView.OnNavigationItemSelectedListener, RecyclerFilterListAdapter {
 
     /**
      * I'll declare and build the client here
@@ -92,6 +98,11 @@ public class MainActivity extends AppCompatActivity implements RecyclerViewItemL
     @BindView(R.id.nav_view)
     NavigationView navigationView;
 
+    @BindView(R.id.empty_message)
+    TextView emptyMessage;
+
+    private MainStoryAdapter storyAdapter;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -111,6 +122,7 @@ public class MainActivity extends AppCompatActivity implements RecyclerViewItemL
         });
 
         refreshLayout.setRefreshing(true);
+        storyAdapter = new MainStoryAdapter(this, this);
         getGeneralStoriesData();
 
 
@@ -121,6 +133,23 @@ public class MainActivity extends AppCompatActivity implements RecyclerViewItemL
 
         navigationView.setNavigationItemSelectedListener(this);
 
+
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu_main_activity, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+        if (id == R.id.refresh_category) {
+            getCategoriesData();
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
     }
 
     private void getCategoriesData() {
@@ -146,8 +175,10 @@ public class MainActivity extends AppCompatActivity implements RecyclerViewItemL
 
     private void workCategoriesResponse(List<Categories> body) {
         Log.d(LOG_TAG, body.toString());
+        LayoutAnimationController animation = AnimationUtils.loadLayoutAnimation(this, R.anim.layout_animation_slide_right);
+        recyclerViewCategories.setLayoutAnimation(animation);
         recyclerViewCategories.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
-        recyclerViewCategories.setAdapter(new CategoriesAdapter(this, body));
+        recyclerViewCategories.setAdapter(new CategoriesAdapter(this, body, this));
     }
 
     private void getGeneralStoriesData() {
@@ -168,8 +199,16 @@ public class MainActivity extends AppCompatActivity implements RecyclerViewItemL
 
     private void workResponse(List<GeneralStory> body) {
         Log.d(LOG_TAG, body.toString());
+        LayoutAnimationController animation = AnimationUtils.loadLayoutAnimation(this, R.anim.grid_layout_animation_bottom);
+        recyclerView.setLayoutAnimation(animation);
         recyclerView.setLayoutManager(new GridLayoutManager(this, 2));
-        recyclerView.setAdapter(new MainStoryAdapter(body, this, this));
+        storyAdapter.swap(body);
+        recyclerView.setAdapter(storyAdapter);
+        if (body.isEmpty()){
+            emptyMessage.setVisibility(View.VISIBLE);
+        } else {
+            emptyMessage.setVisibility(View.GONE);
+        }
         refreshLayout.setRefreshing(false);
     }
 
@@ -180,11 +219,11 @@ public class MainActivity extends AppCompatActivity implements RecyclerViewItemL
     }
 
     @Override
-    public void onRecyclerViewItemClick(int pos, GeneralStory generalStory, ImageView sharedImage) {
+    public void onRecyclerViewItemClick(int pos, int storyId, ImageView sharedImage) {
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             Intent intent = new Intent(MainActivity.this, StoryDetailActivity.class);
-            intent.putExtra(ConfigurationUtils.BUNDLE_MAIN_KEY, generalStory);
+            intent.putExtra(ConfigurationUtils.BUNDLE_MAIN_KEY, storyId);
             intent.putExtra("transition", ViewCompat.getTransitionName(sharedImage));
             ActivityOptionsCompat options = ActivityOptionsCompat.makeSceneTransitionAnimation(MainActivity.this,
                     sharedImage,
@@ -192,7 +231,7 @@ public class MainActivity extends AppCompatActivity implements RecyclerViewItemL
             startActivity(intent, options.toBundle());
         } else {
             Intent intent = new Intent(MainActivity.this, StoryDetailActivity.class);
-            intent.putExtra(ConfigurationUtils.BUNDLE_MAIN_KEY, generalStory);
+            intent.putExtra(ConfigurationUtils.BUNDLE_MAIN_KEY, storyId);
             startActivity(intent);
         }
 
@@ -225,6 +264,20 @@ public class MainActivity extends AppCompatActivity implements RecyclerViewItemL
             drawer.closeDrawer(GravityCompat.START);
         } else {
             super.onBackPressed();
+        }
+    }
+
+    @Override
+    public void onCategoryFilterAdater(List<GeneralStory> generalStories) {
+        if (generalStories != null) {
+            LayoutAnimationController animation = AnimationUtils.loadLayoutAnimation(this, R.anim.grid_layout_animation_bottom);
+            recyclerView.setLayoutAnimation(animation);
+            storyAdapter.swap(generalStories);
+            if (generalStories.isEmpty()){
+                emptyMessage.setVisibility(View.VISIBLE);
+            } else {
+                emptyMessage.setVisibility(View.GONE);
+            }
         }
     }
 }

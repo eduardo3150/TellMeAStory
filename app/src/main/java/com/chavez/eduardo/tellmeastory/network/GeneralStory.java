@@ -34,8 +34,6 @@ public class GeneralStory implements Parcelable {
     @SerializedName("content")
     private List<DetailedStory> detailedStories = new ArrayList<>();
 
-    @SerializedName("category_data")
-    private Categories category;
 
     protected GeneralStory(Parcel in) {
         idStory = in.readInt();
@@ -44,7 +42,6 @@ public class GeneralStory implements Parcelable {
         statusId = in.readInt();
         storyThumbnail = in.readString();
         in.readList(detailedStories, DetailedStory.class.getClassLoader());
-        category = in.readParcelable(Categories.class.getClassLoader());
     }
 
     public static final Creator<GeneralStory> CREATOR = new Creator<GeneralStory>() {
@@ -93,7 +90,6 @@ public class GeneralStory implements Parcelable {
                 ", statusId=" + statusId +
                 ", storyThumbnail='" + storyThumbnail + '\'' +
                 ", detailedStories=" + detailedStories +
-                ", category=" + category +
                 '}';
     }
 
@@ -110,6 +106,5 @@ public class GeneralStory implements Parcelable {
         parcel.writeInt(statusId);
         parcel.writeString(storyThumbnail);
         parcel.writeList(detailedStories);
-        parcel.writeParcelable(category, i);
     }
 }

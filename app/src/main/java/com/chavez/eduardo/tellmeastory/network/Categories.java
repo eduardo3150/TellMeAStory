@@ -6,6 +6,8 @@ import android.os.Parcelable;
 import com.google.gson.annotations.SerializedName;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by eduardo3150 on 9/18/17.
@@ -25,11 +27,15 @@ public class Categories implements Parcelable {
     @SerializedName("category_description")
     private String categoryDescription;
 
+    @SerializedName("stories")
+    private List<GeneralStory> stories = new ArrayList<>();
+
     protected Categories(Parcel in) {
         categoryId = in.readInt();
         categoryName = in.readString();
         categoryThumbnail = in.readString();
         categoryDescription = in.readString();
+        in.readList(stories,GeneralStory.class.getClassLoader());
     }
 
     public static final Creator<Categories> CREATOR = new Creator<Categories>() {
@@ -60,14 +66,8 @@ public class Categories implements Parcelable {
         return categoryThumbnail;
     }
 
-    @Override
-    public String toString() {
-        return "Categories{" +
-                "categoryId=" + categoryId +
-                ", categoryName='" + categoryName + '\'' +
-                ", categoryThumbnail='" + categoryThumbnail + '\'' +
-                ", categoryDescription='" + categoryDescription + '\'' +
-                '}';
+    public List<GeneralStory> getStories() {
+        return stories;
     }
 
     @Override
@@ -76,10 +76,22 @@ public class Categories implements Parcelable {
     }
 
     @Override
+    public String toString() {
+        return "Categories{" +
+                "categoryId=" + categoryId +
+                ", categoryName='" + categoryName + '\'' +
+                ", categoryThumbnail='" + categoryThumbnail + '\'' +
+                ", categoryDescription='" + categoryDescription + '\'' +
+                ", stories=" + stories +
+                '}';
+    }
+
+    @Override
     public void writeToParcel(Parcel parcel, int i) {
         parcel.writeInt(categoryId);
         parcel.writeString(categoryName);
         parcel.writeString(categoryThumbnail);
         parcel.writeString(categoryDescription);
+        parcel.writeList(stories);
     }
 }

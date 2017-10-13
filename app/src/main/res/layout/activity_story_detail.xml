@@ -56,7 +56,10 @@
         android:id="@+id/flexible.example.cardview"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_margin="8dp"
+        android:layout_marginBottom="68dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
         app:behavior_overlapTop="78dp"
         app:cardBackgroundColor="@android:color/white"
         app:cardCornerRadius="4dp"
@@ -85,5 +88,28 @@
         android:layout_margin="@dimen/fab_margin"
         app:layout_anchor="@id/flexible.example.cardview"
         app:layout_anchorGravity="top|right|end" />
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
+        android:layout_gravity="bottom">
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:alpha="0.6"
+            android:background="#000" />
+
+        <TextView
+            android:id="@+id/pager_counter"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:layout_margin="8dp"
+            android:textAppearance="?android:textAppearanceMedium"
+            android:textColor="@android:color/white" />
+
+    </RelativeLayout>
+
 
 </android.support.design.widget.CoordinatorLayout>

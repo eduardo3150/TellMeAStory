@@ -24,20 +24,31 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.TextView;
 
 import com.chavez.eduardo.tellmeastory.R;
+import com.chavez.eduardo.tellmeastory.network.DetailedStory;
 import com.chavez.eduardo.tellmeastory.network.GeneralStory;
+import com.chavez.eduardo.tellmeastory.network.NetworkUtils;
+import com.chavez.eduardo.tellmeastory.network.StoriesRequestClient;
 import com.chavez.eduardo.tellmeastory.utils.ConfigurationUtils;
 import com.chavez.eduardo.tellmeastory.utils.SpeakRequest;
 import com.squareup.picasso.Callback;
 import com.squareup.picasso.Picasso;
 
 
+import java.util.List;
+
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.Unbinder;
+import retrofit2.Call;
+import retrofit2.Response;
+import retrofit2.Retrofit;
+import retrofit2.converter.gson.GsonConverterFactory;
 
 import static com.chavez.eduardo.tellmeastory.network.NetworkUtils.IMG_BASE_URL;
+import static com.chavez.eduardo.tellmeastory.network.NetworkUtils.SERVICE_BASE_URL;
 
 public class StoryDetailActivity extends AppCompatActivity implements AppBarLayout.OnOffsetChangedListener {
 
@@ -57,7 +68,7 @@ public class StoryDetailActivity extends AppCompatActivity implements AppBarLayo
     @BindView(R.id.container)
     ViewPager mViewPager;
 
-    private GeneralStory story;
+    //private GeneralStory story;
 
     private static final String LOG_TAG = StoryDetailActivity.class.getSimpleName();
 
@@ -68,6 +79,10 @@ public class StoryDetailActivity extends AppCompatActivity implements AppBarLayo
 
     Unbinder unbinder;
 
+    StoriesRequestClient client = new Retrofit.Builder()
+            .baseUrl(SERVICE_BASE_URL)
+            .addConverterFactory(GsonConverterFactory.create())
+            .build().create(StoriesRequestClient.class);
 
     private static final int PERCENTAGE_TO_SHOW_IMAGE = 20;
     private int mMaxScrollSize;
@@ -91,6 +106,11 @@ public class StoryDetailActivity extends AppCompatActivity implements AppBarLayo
     private boolean firstAppearTTS = true;
     private boolean canTransform = false;
 
+    private int storyId = 0;
+
+    @BindView(R.id.pager_counter)
+    TextView pager_counter;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -99,36 +119,45 @@ public class StoryDetailActivity extends AppCompatActivity implements AppBarLayo
         AppCompatDelegate.setCompatVectorFromResourcesEnabled(true);
         if (getIntent().getExtras() != null) {
             extras = getIntent().getExtras();
-            story = (GeneralStory) extras.getParcelable(ConfigurationUtils.BUNDLE_MAIN_KEY);
-            Log.d(LOG_TAG, story.toString());
+            storyId = extras.getInt(ConfigurationUtils.BUNDLE_MAIN_KEY);
+            askForDetails(storyId);
 
         }
 
-        toolbar.setTitle(story.getStoryName());
-        setSupportActionBar(toolbar);
-        if (getSupportActionBar() != null) {
-            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-            toolbar.setNavigationOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    onBackPressed();
-                }
-            });
-        }
-
-        generateHeader();
 
 
         // Create the adapter that will return a fragment for each of the three
         // primary sections of the activity.
-        mSectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager());
-
-        setUpViewPager(mSectionsPagerAdapter);
 
 
         speakRequest = new SpeakRequest(this);
         listenToFinishedText();
         fab.setImageDrawable(VectorDrawableCompat.create(getResources(), R.drawable.ic_headset_24dp, null));
+
+        appBarLayout.addOnOffsetChangedListener(this);
+    }
+
+    private void askForDetails(int storyId) {
+        Call<GeneralStory> call = client.getStory(String.valueOf(storyId));
+        call.enqueue(new retrofit2.Callback<GeneralStory>() {
+            @Override
+            public void onResponse(Call<GeneralStory> call, Response<GeneralStory> response) {
+                if (response.isSuccessful()) {
+                    workResponse(response.body());
+                }
+            }
+
+            @Override
+            public void onFailure(Call<GeneralStory> call, Throwable t) {
+
+            }
+        });
+    }
+
+    private void workResponse(final GeneralStory body) {
+        Log.d(LOG_TAG, body.toString());
+        toolbar.setTitle(body.getStoryName());
+        generateHeader(body);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -140,8 +169,8 @@ public class StoryDetailActivity extends AppCompatActivity implements AppBarLayo
                     rotated = true;
                     animateButtons();
                 } else {
-                    if (story != null && !speakRequest.isSpeaking() && rotated) {
-                        speakRequest.speak(story.getDetailedStories().get(whereAmISpeaking).getSectionText());
+                    if (body != null && !speakRequest.isSpeaking() && rotated) {
+                        speakRequest.speak(body.getDetailedStories().get(whereAmISpeaking).getSectionText());
                         rotated = false;
                         animateButtons();
 
@@ -170,7 +199,20 @@ public class StoryDetailActivity extends AppCompatActivity implements AppBarLayo
             }
         });
 
-        appBarLayout.addOnOffsetChangedListener(this);
+
+        setSupportActionBar(toolbar);
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+            toolbar.setNavigationOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    onBackPressed();
+                }
+            });
+        }
+        mSectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager(), body.getDetailedStories());
+
+        setUpViewPager(mSectionsPagerAdapter, body);
 
     }
 
@@ -209,13 +251,13 @@ public class StoryDetailActivity extends AppCompatActivity implements AppBarLayo
     }
 
 
-    private void generateHeader() {
+    private void generateHeader(GeneralStory body) {
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             String transitionName = extras.getString("transition");
             headerReceived.setTransitionName(transitionName);
             Picasso.with(this)
-                    .load(IMG_BASE_URL+story.getStoryThumbnail())
+                    .load(IMG_BASE_URL + body.getStoryThumbnail())
                     .noFade()
                     .into(headerReceived, new Callback() {
                         @Override
@@ -230,7 +272,7 @@ public class StoryDetailActivity extends AppCompatActivity implements AppBarLayo
                     });
         } else {
             Picasso.with(this)
-                    .load(IMG_BASE_URL+story.getStoryThumbnail())
+                    .load(IMG_BASE_URL + body.getStoryThumbnail())
                     .noFade()
                     .into(headerReceived, new Callback() {
                         @Override
@@ -246,8 +288,9 @@ public class StoryDetailActivity extends AppCompatActivity implements AppBarLayo
         }
     }
 
-    private void setUpViewPager(SectionsPagerAdapter mSectionsPagerAdapter) {
+    private void setUpViewPager(SectionsPagerAdapter mSectionsPagerAdapter, final GeneralStory body) {
         mViewPager.setAdapter(mSectionsPagerAdapter);
+        pager_counter.setText(1 + "/" + body.getDetailedStories().size());
         mViewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
             @Override
             public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
@@ -268,7 +311,7 @@ public class StoryDetailActivity extends AppCompatActivity implements AppBarLayo
                     rotated = true;
                     animateButtons();
                 }
-
+                pager_counter.setText((position + 1) + "/" + body.getDetailedStories().size());
 
             }
 
@@ -365,22 +408,24 @@ public class StoryDetailActivity extends AppCompatActivity implements AppBarLayo
      * one of the sections/tabs/pages.
      */
     public class SectionsPagerAdapter extends FragmentPagerAdapter {
+        List<DetailedStory> detailedStories;
 
-        public SectionsPagerAdapter(FragmentManager fm) {
+        public SectionsPagerAdapter(FragmentManager fm, List<DetailedStory> stories) {
             super(fm);
+            this.detailedStories = stories;
         }
 
         @Override
         public Fragment getItem(int position) {
             // getItem is called to instantiate the fragment for the given page.
             // Return a DetailedStoryFragment (defined as a static inner class below).
-            return DetailedStoryFragment.newInstance(story.getDetailedStories().get(position));
+            return DetailedStoryFragment.newInstance(detailedStories.get(position));
         }
 
         @Override
         public int getCount() {
             // Show total pages according to the size of this list.
-            return story.getDetailedStories().size();
+            return detailedStories.size();
         }
 
         @Override

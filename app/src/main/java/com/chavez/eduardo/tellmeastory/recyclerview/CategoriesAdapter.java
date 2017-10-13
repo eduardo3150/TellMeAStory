@@ -26,10 +26,12 @@ import static com.chavez.eduardo.tellmeastory.network.NetworkUtils.IMG_BASE_URL;
 public class CategoriesAdapter extends RecyclerView.Adapter<CategoriesAdapter.ViewHolder> {
     private Context context;
     private List<Categories> categories;
+    private RecyclerFilterListAdapter listAdapter;
 
-    public CategoriesAdapter(Context context, List<Categories> categories) {
+    public CategoriesAdapter(Context context, List<Categories> categories, RecyclerFilterListAdapter adapter) {
         this.context = context;
         this.categories = categories;
+        this.listAdapter = adapter;
     }
 
     @Override
@@ -40,10 +42,15 @@ public class CategoriesAdapter extends RecyclerView.Adapter<CategoriesAdapter.Vi
 
     @Override
     public void onBindViewHolder(CategoriesAdapter.ViewHolder holder, int position) {
-        Categories category = categories.get(position);
-
+        final Categories category = categories.get(position);
         holder.categoryLabel.setText(category.getCategoryName());
         Picasso.with(context).load(IMG_BASE_URL+category.getCategoryThumbnail()).into(holder.categoryPicture);
+        holder.itemView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                listAdapter.onCategoryFilterAdater(category.getStories());
+            }
+        });
     }
 
     @Override

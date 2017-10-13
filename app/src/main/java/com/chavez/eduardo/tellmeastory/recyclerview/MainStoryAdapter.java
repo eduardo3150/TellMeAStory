@@ -35,8 +35,8 @@ public class MainStoryAdapter extends RecyclerView.Adapter<MainStoryAdapter.View
     private Context context;
     private RecyclerViewItemListener listener;
 
-    public MainStoryAdapter(List<GeneralStory> generalStories, Context context, RecyclerViewItemListener listener) {
-        this.generalStories = generalStories;
+    public MainStoryAdapter(Context context, RecyclerViewItemListener listener) {
+        //this.generalStories = generalStories;
         this.context = context;
         this.listener = listener;
     }
@@ -55,7 +55,7 @@ public class MainStoryAdapter extends RecyclerView.Adapter<MainStoryAdapter.View
         holder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                listener.onRecyclerViewItemClick(holder.getAdapterPosition(), story, holder.story_thumbnail);
+                listener.onRecyclerViewItemClick(holder.getAdapterPosition(), story.getIdStory(), holder.story_thumbnail);
             }
         });
 
@@ -66,6 +66,17 @@ public class MainStoryAdapter extends RecyclerView.Adapter<MainStoryAdapter.View
             }
         });
 
+    }
+
+    public void swap(List<GeneralStory> list){
+        if (generalStories != null) {
+            generalStories.clear();
+            generalStories.addAll(list);
+        }
+        else {
+            generalStories = list;
+        }
+        notifyDataSetChanged();
     }
 
     private void showMenu(View view, int position) {
