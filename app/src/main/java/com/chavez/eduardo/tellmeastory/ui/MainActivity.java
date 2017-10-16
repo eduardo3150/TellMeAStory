@@ -166,10 +166,9 @@ public class MainActivity extends AppCompatActivity implements RecyclerViewItemL
                 if (response.isSuccessful()) {
                     workCategoriesResponse(response.body());
                 } else {
-                    Log.d(LOG_TAG, "ERROR" + response.message());
+                    //Log.d(LOG_TAG, "ERROR" + response.message());
                     new AlertDialog.Builder(MainActivity.this)
                             .setTitle("Atencion")
-                            .setCancelable(false)
                             .setMessage("No se puede completar la solicitud")
                             .setPositiveButton("Reintentar", new DialogInterface.OnClickListener() {
                                 @Override
@@ -189,10 +188,9 @@ public class MainActivity extends AppCompatActivity implements RecyclerViewItemL
 
             @Override
             public void onFailure(Call<List<Categories>> call, Throwable t) {
-                Log.d(LOG_TAG, t.getLocalizedMessage());
+                //Log.d(LOG_TAG, t.getLocalizedMessage());
                 new AlertDialog.Builder(MainActivity.this)
                         .setTitle("Atencion")
-                        .setCancelable(false)
                         .setMessage("No se puede completar la solicitud")
                         .setPositiveButton("Reintentar", new DialogInterface.OnClickListener() {
                             @Override
@@ -259,7 +257,7 @@ public class MainActivity extends AppCompatActivity implements RecyclerViewItemL
 
             @Override
             public void onFailure(Call<List<GeneralStory>> call, Throwable t) {
-                Log.d(LOG_TAG,t.getLocalizedMessage());
+                //Log.d(LOG_TAG,t.getLocalizedMessage());
                 refreshLayout.setRefreshing(false);
                 new AlertDialog.Builder(MainActivity.this)
                         .setTitle("Atencion")
@@ -282,7 +280,7 @@ public class MainActivity extends AppCompatActivity implements RecyclerViewItemL
     }
 
     private void workResponse(List<GeneralStory> body) {
-        Log.d(LOG_TAG, body.toString());
+        //Log.d(LOG_TAG, body.toString());
         LayoutAnimationController animation = AnimationUtils.loadLayoutAnimation(this, R.anim.grid_layout_animation_bottom);
         recyclerView.setLayoutAnimation(animation);
         recyclerView.setLayoutManager(new GridLayoutManager(this, 2));
