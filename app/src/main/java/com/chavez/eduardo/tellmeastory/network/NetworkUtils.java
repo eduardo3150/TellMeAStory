@@ -5,6 +5,6 @@ package com.chavez.eduardo.tellmeastory.network;
  */
 
 public class NetworkUtils {
-    public static final String SERVICE_BASE_URL ="http://192.168.1.2:82/api/v1/";
-    public static final String IMG_BASE_URL="http://192.168.1.2:82";
+    public static final String SERVICE_BASE_URL ="http://52.24.102.31/api/v1/";
+    public static final String IMG_BASE_URL="http://52.24.102.31";
 }

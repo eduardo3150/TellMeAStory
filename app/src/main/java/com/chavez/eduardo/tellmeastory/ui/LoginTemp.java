@@ -10,6 +10,7 @@ import android.widget.Button;
 import android.widget.EditText;
 
 import com.chavez.eduardo.tellmeastory.R;
+import com.chavez.eduardo.tellmeastory.network.NetworkUtils;
 import com.chavez.eduardo.tellmeastory.utils.ConfigurationUtils;
 
 import butterknife.BindView;
@@ -23,6 +24,9 @@ public class LoginTemp extends AppCompatActivity {
     @BindView(R.id.ip_saver)
     Button button;
     private boolean loggedIn =false;
+
+    @BindView(R.id.ip_default)
+    Button defaultButton;
 
 
     @Override
@@ -45,6 +49,20 @@ public class LoginTemp extends AppCompatActivity {
                     startActivity(intent);
                     finish();
                 }
+            }
+        });
+
+        defaultButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                SharedPreferences sharedPreferences = getSharedPreferences(ConfigurationUtils.PREF_KEY, Context.MODE_PRIVATE);
+                SharedPreferences.Editor editor = sharedPreferences.edit();
+                editor.putBoolean(ConfigurationUtils.IP_SET_KEY, true);
+                editor.putString(ConfigurationUtils.IP_VALUE_KEY, NetworkUtils.IMG_BASE_URL);
+                editor.apply();
+                Intent intent = new Intent(LoginTemp.this, MainActivity.class);
+                startActivity(intent);
+                finish();
             }
         });
     }

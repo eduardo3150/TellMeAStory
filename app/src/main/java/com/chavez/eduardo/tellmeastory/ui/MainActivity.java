@@ -239,7 +239,6 @@ public class MainActivity extends AppCompatActivity implements RecyclerViewItemL
                     refreshLayout.setRefreshing(false);
                     new AlertDialog.Builder(MainActivity.this)
                             .setTitle("Atencion")
-                            .setCancelable(false)
                             .setMessage("No se puede completar la solicitud")
                             .setPositiveButton("Reintentar", new DialogInterface.OnClickListener() {
                                 @Override
@@ -264,7 +263,6 @@ public class MainActivity extends AppCompatActivity implements RecyclerViewItemL
                 refreshLayout.setRefreshing(false);
                 new AlertDialog.Builder(MainActivity.this)
                         .setTitle("Atencion")
-                        .setCancelable(false)
                         .setMessage("No se puede completar la solicitud")
                         .setPositiveButton("Reintentar", new DialogInterface.OnClickListener() {
                             @Override
