@@ -51,7 +51,7 @@ public class CategoriesAdapter extends RecyclerView.Adapter<CategoriesAdapter.Vi
         final Categories category = categories.get(position);
 
         holder.categoryLabel.setText(category.getCategoryName());
-        Picasso.with(context).load(BASE_URL + category.getCategoryThumbnail()).into(holder.categoryPicture);
+        Picasso.with(context).load(NetworkUtils.IMG_BASE_URL + category.getCategoryThumbnail()).into(holder.categoryPicture);
         holder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {

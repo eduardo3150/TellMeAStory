@@ -45,6 +45,17 @@ import com.chavez.eduardo.tellmeastory.recyclerview.MainStoryAdapter;
 import com.chavez.eduardo.tellmeastory.recyclerview.RecyclerFilterListAdapter;
 import com.chavez.eduardo.tellmeastory.recyclerview.RecyclerViewItemListener;
 import com.chavez.eduardo.tellmeastory.utils.ConfigurationUtils;
+import com.google.android.gms.ads.AdRequest;
+import com.google.android.gms.ads.AdSize;
+import com.google.android.gms.ads.AdView;
+import com.google.android.gms.ads.MobileAds;
+import com.google.android.gms.auth.api.signin.GoogleSignIn;
+import com.google.android.gms.auth.api.signin.GoogleSignInClient;
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 
 import java.util.List;
 
@@ -58,7 +69,6 @@ import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
 public class MainActivity extends AppCompatActivity implements RecyclerViewItemListener, NavigationView.OnNavigationItemSelectedListener, RecyclerFilterListAdapter {
-
 
 
     /**
@@ -93,7 +103,13 @@ public class MainActivity extends AppCompatActivity implements RecyclerViewItemL
     @BindView(R.id.empty_message)
     TextView emptyMessage;
 
+    @BindView(R.id.adView)
+    AdView adView;
+
     private MainStoryAdapter storyAdapter;
+
+    private FirebaseAuth auth;
+    private GoogleSignInClient googleSignInClient;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -105,7 +121,12 @@ public class MainActivity extends AppCompatActivity implements RecyclerViewItemL
         /**
          * I'll declare and build the client here
          **/
+        // Sample AdMob app ID: ca-app-pub-3940256099942544~3347511713
+        MobileAds.initialize(this, "ca-app-pub-3940256099942544~3347511713");
 
+        AdRequest adRequest = new AdRequest.Builder()
+                .build();
+        adView.loadAd(adRequest);
 
         getCategoriesData();
 
@@ -131,7 +152,25 @@ public class MainActivity extends AppCompatActivity implements RecyclerViewItemL
 
         navigationView.setNavigationItemSelectedListener(this);
 
+        GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                .requestIdToken(getString(R.string.default_web_client_id))
+                .requestEmail()
+                .build();
 
+        googleSignInClient = GoogleSignIn.getClient(this, gso);
+
+        auth = FirebaseAuth.getInstance();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        FirebaseUser currentUser = auth.getCurrentUser();
+        updateUI(currentUser);
+    }
+
+    private void updateUI(FirebaseUser currentUser) {
+        Toast.makeText(this, "Hello! " + currentUser.getDisplayName(), Toast.LENGTH_SHORT).show();
     }
 
     @Override
@@ -154,7 +193,7 @@ public class MainActivity extends AppCompatActivity implements RecyclerViewItemL
         SharedPreferences sharedPreferences = getSharedPreferences(ConfigurationUtils.PREF_KEY, Context.MODE_PRIVATE);
         String BASE_URL = sharedPreferences.getString(ConfigurationUtils.IP_VALUE_KEY, NetworkUtils.SERVICE_BASE_URL);
         CategoriesRequestClient categoriesClient = new Retrofit.Builder()
-                .baseUrl(BASE_URL+"/api/v1/")
+                .baseUrl(NetworkUtils.SERVICE_BASE_URL)
                 .addConverterFactory(GsonConverterFactory.create())
                 .build().create(CategoriesRequestClient.class);
 
@@ -223,7 +262,7 @@ public class MainActivity extends AppCompatActivity implements RecyclerViewItemL
         SharedPreferences sharedPreferences = getSharedPreferences(ConfigurationUtils.PREF_KEY, Context.MODE_PRIVATE);
         String BASE_URL = sharedPreferences.getString(ConfigurationUtils.IP_VALUE_KEY, NetworkUtils.SERVICE_BASE_URL);
         StoriesRequestClient client = new Retrofit.Builder()
-                .baseUrl(BASE_URL+"/api/v1/")
+                .baseUrl(NetworkUtils.SERVICE_BASE_URL)
                 .addConverterFactory(GsonConverterFactory.create())
                 .build().create(StoriesRequestClient.class);
 
@@ -287,7 +326,7 @@ public class MainActivity extends AppCompatActivity implements RecyclerViewItemL
         storyAdapter.swap(body);
         recyclerView.setAdapter(storyAdapter);
         recyclerView.setNestedScrollingEnabled(true);
-        if (body.isEmpty()){
+        if (body.isEmpty()) {
             emptyMessage.setVisibility(View.VISIBLE);
         } else {
             emptyMessage.setVisibility(View.GONE);
@@ -333,13 +372,8 @@ public class MainActivity extends AppCompatActivity implements RecyclerViewItemL
         } else if (id == R.id.nav_share) {
             Snackbar.make(getCurrentFocus(), "Pendiente", Snackbar.LENGTH_SHORT).show();
         } else if (id == R.id.nav_send) {
-            Snackbar.make(getCurrentFocus(), "Pendiente", Snackbar.LENGTH_SHORT).show();
-            SharedPreferences sharedPreferences = getSharedPreferences(ConfigurationUtils.PREF_KEY, Context.MODE_PRIVATE);
-            SharedPreferences.Editor editor = sharedPreferences.edit();
-            editor.clear();
-            editor.apply();
-            startActivity(new Intent(MainActivity.this, LoginTemp.class));
-            MainActivity.this.finish();
+
+            signOut();
 
         }
 
@@ -363,11 +397,26 @@ public class MainActivity extends AppCompatActivity implements RecyclerViewItemL
             LayoutAnimationController animation = AnimationUtils.loadLayoutAnimation(this, R.anim.grid_layout_animation_bottom);
             recyclerView.setLayoutAnimation(animation);
             storyAdapter.swap(generalStories);
-            if (generalStories.isEmpty()){
+            if (generalStories.isEmpty()) {
                 emptyMessage.setVisibility(View.VISIBLE);
             } else {
                 emptyMessage.setVisibility(View.GONE);
             }
         }
+    }
+
+    private void signOut() {
+        // Firebase sign out
+        auth.signOut();
+
+        // Google sign out
+        googleSignInClient.signOut().addOnCompleteListener(this,
+                new OnCompleteListener<Void>() {
+                    @Override
+                    public void onComplete(@NonNull Task<Void> task) {
+                        startActivity(new Intent(MainActivity.this, LoginTemp.class));
+                        MainActivity.this.finish();
+                    }
+                });
     }
 }

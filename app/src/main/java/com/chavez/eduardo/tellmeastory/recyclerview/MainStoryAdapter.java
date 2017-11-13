@@ -58,7 +58,7 @@ public class MainStoryAdapter extends RecyclerView.Adapter<MainStoryAdapter.View
         final GeneralStory story = generalStories.get(position);
 
         holder.story_title.setText(story.getStoryName());
-        Picasso.with(context).load(BASE_URL+story.getStoryThumbnail()).into(holder.story_thumbnail);
+        Picasso.with(context).load(NetworkUtils.IMG_BASE_URL+story.getStoryThumbnail()).into(holder.story_thumbnail);
         holder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {

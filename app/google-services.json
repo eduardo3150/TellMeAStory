@@ -1,0 +1,55 @@
+{
+  "project_info": {
+    "project_number": "113749425155",
+    "firebase_url": "https://tellmeastory3150.firebaseio.com",
+    "project_id": "tellmeastory3150",
+    "storage_bucket": "tellmeastory3150.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:113749425155:android:f76ed7987ab32668",
+        "android_client_info": {
+          "package_name": "com.chavez.eduardo.tellmeastory"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "113749425155-0hrrvtbvp53blrcmk1ckn32358vntjbi.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.chavez.eduardo.tellmeastory",
+            "certificate_hash": "acf75a4bf7d88d0cf698f990de558fe1a62affa2"
+          }
+        },
+        {
+          "client_id": "113749425155-mcoeckomma2dhdb8qfk4tc81nhss25au.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDQuiU37hfXH1P9I3LuQ-LxkiILZuCE8Vk"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "113749425155-mcoeckomma2dhdb8qfk4tc81nhss25au.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

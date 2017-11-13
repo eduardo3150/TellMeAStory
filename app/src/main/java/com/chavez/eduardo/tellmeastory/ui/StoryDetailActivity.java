@@ -142,7 +142,7 @@ public class StoryDetailActivity extends AppCompatActivity implements AppBarLayo
         SharedPreferences sharedPreferences = getSharedPreferences(ConfigurationUtils.PREF_KEY, Context.MODE_PRIVATE);
         String BASE_URL = sharedPreferences.getString(ConfigurationUtils.IP_VALUE_KEY, NetworkUtils.SERVICE_BASE_URL);
         StoriesRequestClient client = new Retrofit.Builder()
-                .baseUrl(BASE_URL+"/api/v1/")
+                .baseUrl(NetworkUtils.SERVICE_BASE_URL)
                 .addConverterFactory(GsonConverterFactory.create())
                 .build().create(StoriesRequestClient.class);
         Call<GeneralStory> call = client.getStory(String.valueOf(storyId));
@@ -286,7 +286,7 @@ public class StoryDetailActivity extends AppCompatActivity implements AppBarLayo
             String transitionName = extras.getString("transition");
             headerReceived.setTransitionName(transitionName);
             Picasso.with(this)
-                    .load(BASE_URL + body.getStoryThumbnail())
+                    .load(NetworkUtils.IMG_BASE_URL + body.getStoryThumbnail())
                     .noFade()
                     .into(headerReceived, new Callback() {
                         @Override
@@ -301,7 +301,7 @@ public class StoryDetailActivity extends AppCompatActivity implements AppBarLayo
                     });
         } else {
             Picasso.with(this)
-                    .load(BASE_URL + body.getStoryThumbnail())
+                    .load(NetworkUtils.IMG_BASE_URL + body.getStoryThumbnail())
                     .noFade()
                     .into(headerReceived, new Callback() {
                         @Override

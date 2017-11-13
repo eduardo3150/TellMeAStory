@@ -93,7 +93,7 @@ public class DetailedStoryFragment extends Fragment {
         String BASE_URL = sharedPreferences.getString(ConfigurationUtils.IP_VALUE_KEY, NetworkUtils.SERVICE_BASE_URL);
         storyDetailedTitle.setText(story.getSectionTitle());
         storyDetailedContent.setText(story.getSectionText());
-        Picasso.with(getContext()).load(BASE_URL+story.getSectionImage()).noFade().into(storyDetailedImage);
+        Picasso.with(this.getContext()).load(NetworkUtils.IMG_BASE_URL+story.getSectionImage()).noFade().into(storyDetailedImage);
         final Handler handler = new Handler();
         handler.postDelayed(new Runnable() {
             @Override public void run() {
