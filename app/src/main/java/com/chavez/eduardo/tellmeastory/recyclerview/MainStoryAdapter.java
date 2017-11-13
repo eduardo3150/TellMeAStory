@@ -10,9 +10,10 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Filter;
+import android.widget.Filterable;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.chavez.eduardo.tellmeastory.R;
 import com.chavez.eduardo.tellmeastory.network.GeneralStory;
@@ -20,27 +21,27 @@ import com.chavez.eduardo.tellmeastory.network.NetworkUtils;
 import com.chavez.eduardo.tellmeastory.utils.ConfigurationUtils;
 import com.squareup.picasso.Picasso;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-import static com.chavez.eduardo.tellmeastory.network.NetworkUtils.IMG_BASE_URL;
-
 /**
  * Created by eduardo3150 on 9/18/17.
  */
 
-public class MainStoryAdapter extends RecyclerView.Adapter<MainStoryAdapter.ViewHolder> {
+public class MainStoryAdapter extends RecyclerView.Adapter<MainStoryAdapter.ViewHolder> implements Filterable {
 
-    private List<GeneralStory> generalStories;
+    private List<GeneralStory> generalStoriesFilter = new ArrayList<>();
+    private List<GeneralStory> generalStories = new ArrayList<>();
     private Context context;
     private RecyclerViewItemListener listener;
     String BASE_URL;
 
     public MainStoryAdapter(Context context, RecyclerViewItemListener listener) {
-        //this.generalStories = generalStories;
+        //this.generalStoriesFilter = generalStoriesFilter;
         this.context = context;
         this.listener = listener;
         SharedPreferences sharedPreferences = context.getSharedPreferences(ConfigurationUtils.PREF_KEY, Context.MODE_PRIVATE);
@@ -55,7 +56,7 @@ public class MainStoryAdapter extends RecyclerView.Adapter<MainStoryAdapter.View
 
     @Override
     public void onBindViewHolder(final ViewHolder holder, final int position) {
-        final GeneralStory story = generalStories.get(position);
+        final GeneralStory story = generalStoriesFilter.get(position);
 
         holder.story_title.setText(story.getStoryName());
         Picasso.with(context).load(NetworkUtils.IMG_BASE_URL+story.getStoryThumbnail()).into(holder.story_thumbnail);
@@ -76,11 +77,14 @@ public class MainStoryAdapter extends RecyclerView.Adapter<MainStoryAdapter.View
     }
 
     public void swap(List<GeneralStory> list){
-        if (generalStories != null) {
+        if (generalStoriesFilter != null) {
+            generalStoriesFilter.clear();
+            generalStoriesFilter.addAll(list);
             generalStories.clear();
             generalStories.addAll(list);
         }
         else {
+            generalStoriesFilter = list;
             generalStories = list;
         }
         notifyDataSetChanged();
@@ -96,7 +100,39 @@ public class MainStoryAdapter extends RecyclerView.Adapter<MainStoryAdapter.View
 
     @Override
     public int getItemCount() {
-        return generalStories.size();
+        return generalStoriesFilter.size();
+    }
+
+    @Override
+    public Filter getFilter() {
+        return new Filter() {
+            @Override
+            protected FilterResults performFiltering(CharSequence charSequence) {
+                String charString = charSequence.toString();
+
+                if (charString.isEmpty()) {
+                    generalStoriesFilter = generalStories;
+                } else {
+                    ArrayList<GeneralStory> filteredList = new ArrayList<>();
+                    for (GeneralStory d : generalStories) {
+                        if (d.getStoryName().toLowerCase().contains(charSequence)) {
+                            filteredList.add(d);
+                        }
+                    }
+                    generalStoriesFilter = filteredList;
+                }
+
+                FilterResults filterResults = new FilterResults();
+                filterResults.values = generalStoriesFilter;
+                return filterResults;
+            }
+
+            @Override
+            protected void publishResults(CharSequence charSequence, FilterResults filterResults) {
+                generalStoriesFilter = (ArrayList<GeneralStory>) filterResults.values;
+                notifyDataSetChanged();
+            }
+        };
     }
 
     public class ViewHolder extends RecyclerView.ViewHolder {

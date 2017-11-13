@@ -11,6 +11,7 @@ import android.support.design.widget.NavigationView;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v4.view.GravityCompat;
+import android.support.v4.view.MenuItemCompat;
 import android.support.v4.view.ViewCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v4.widget.SwipeRefreshLayout;
@@ -22,6 +23,7 @@ import android.support.v7.app.AppCompatDelegate;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
@@ -100,11 +102,17 @@ public class MainActivity extends AppCompatActivity implements RecyclerViewItemL
     @BindView(R.id.nav_view)
     NavigationView navigationView;
 
+
     @BindView(R.id.empty_message)
     TextView emptyMessage;
 
     @BindView(R.id.adView)
     AdView adView;
+
+    @BindView(R.id.recycler_category_label)
+    TextView categoryLabel;
+
+    private View header;
 
     private MainStoryAdapter storyAdapter;
 
@@ -122,9 +130,10 @@ public class MainActivity extends AppCompatActivity implements RecyclerViewItemL
          * I'll declare and build the client here
          **/
         // Sample AdMob app ID: ca-app-pub-3940256099942544~3347511713
-        MobileAds.initialize(this, "ca-app-pub-3940256099942544~3347511713");
+        MobileAds.initialize(this, "ca-app-pub-3120993551474369~7688015114");
 
         AdRequest adRequest = new AdRequest.Builder()
+                .addTestDevice("3FC40E25F6C3990251116B9422886780")
                 .build();
         adView.loadAd(adRequest);
 
@@ -170,13 +179,44 @@ public class MainActivity extends AppCompatActivity implements RecyclerViewItemL
     }
 
     private void updateUI(FirebaseUser currentUser) {
-        Toast.makeText(this, "Hello! " + currentUser.getDisplayName(), Toast.LENGTH_SHORT).show();
+        header = navigationView.getHeaderView(0);
+        TextView userName = (TextView) header.findViewById(R.id.user_name);
+        TextView email = (TextView) header.findViewById(R.id.email_user);
+        userName.setText(currentUser.getDisplayName());
+        email.setText(currentUser.getEmail());
+
     }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu_main_activity, menu);
+        MenuItem search = menu.findItem(R.id.search);
+        SearchView searchView = (SearchView) MenuItemCompat.getActionView(search);
+        searchView.setQueryHint("Buscar historia");
+        search(searchView);
         return true;
+    }
+
+    private void search(SearchView searchView) {
+        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String s) {
+                return false;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String s) {
+                if (!s.isEmpty()){
+                    recyclerViewCategories.setVisibility(View.GONE);
+                    categoryLabel.setVisibility(View.GONE);
+                } else {
+                    recyclerViewCategories.setVisibility(View.VISIBLE);
+                    categoryLabel.setVisibility(View.VISIBLE);
+                }
+                storyAdapter.getFilter().filter(s);
+                return true;
+            }
+        });
     }
 
     @Override
